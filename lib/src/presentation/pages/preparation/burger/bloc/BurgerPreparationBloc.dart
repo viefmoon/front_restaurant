@@ -68,10 +68,8 @@ class BurgerPreparationBloc
   }
 
   void disconnectWebSocket() {
-    print('disconnect');
-    print('socket: $socket');
-    if (socket?.connected ?? false) {
-      socket?.disconnect();
+    if (socket != null && socket!.connected) {
+      socket!.disconnect();
       print('WebSocket Disconnected');
     }
   }
@@ -273,5 +271,12 @@ class BurgerPreparationBloc
         .map((orderItemJson) => OrderItem.fromJson(orderItemJson))
         .toList());
     return order;
+  }
+
+  @override
+  Future<void> close() {
+    disconnectWebSocket(); // Asegúrate de que el socket se desconecte
+    return super
+        .close(); // No olvides llamar a super.close() para completar el ciclo de vida del Bloc
   }
 }

@@ -165,6 +165,7 @@ class _OrderPizzaPreparationWidgetState
                           fontFamily: 'Arial',
                           fontStyle: FontStyle.italic),
                     ),
+                    _buildAdditionalPreparationStatus(widget.order),
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 1.0),
                       child: Text.rich(
@@ -236,6 +237,56 @@ class _OrderPizzaPreparationWidgetState
         ),
       ),
     );
+  }
+
+  Widget _buildAdditionalPreparationStatus(Order order) {
+    List<Widget> statusWidgets = [];
+    if (order.barPreparationStatus != OrderPreparationStatus.not_required) {
+      Color barColor = _getColorByPreparationStatus(order.barPreparationStatus);
+      statusWidgets.add(
+        Text(
+          'BAR',
+          style: TextStyle(
+              color: barColor,
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              fontStyle: FontStyle.italic),
+        ),
+      );
+    }
+    if (order.burgerPreparationStatus != OrderPreparationStatus.not_required) {
+      Color pizzaColor =
+          _getColorByPreparationStatus(order.burgerPreparationStatus);
+      statusWidgets.add(
+        Text(
+          'HAMBURGUESA',
+          style: TextStyle(
+              color: pizzaColor,
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              fontStyle: FontStyle.italic),
+        ),
+      );
+    }
+    // Añade un SizedBox para separar los textos si ambos están presentes
+    if (statusWidgets.length > 1) {
+      statusWidgets.insert(
+          1, SizedBox(width: 12)); // Ajusta el espacio según necesites
+    }
+    return Row(children: statusWidgets);
+  }
+
+  Color _getColorByPreparationStatus(OrderPreparationStatus? status) {
+    switch (status) {
+      case OrderPreparationStatus.created:
+        return Colors.black;
+      case OrderPreparationStatus.in_preparation:
+        return Colors.blue;
+      case OrderPreparationStatus.prepared:
+        return Colors.green;
+      default:
+        return Colors.grey;
+    }
   }
 
   Color _getColorByOrderType(OrderType? type) {
