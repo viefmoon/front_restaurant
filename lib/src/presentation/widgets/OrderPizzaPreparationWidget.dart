@@ -513,13 +513,17 @@ class _OrderPizzaPreparationWidgetState
 // Añadir ingredientes al widget, ordenados por mitad
       if (ingredientsLeft.isNotEmpty || ingredientsRight.isNotEmpty) {
         String ingredientsText = '';
+
         if (ingredientsLeft.isNotEmpty) {
-          ingredientsText += 'Mitad 1: ${ingredientsLeft.join(', ')}';
+          ingredientsText += ingredientsLeft.join(', ');
         }
+
         if (ingredientsRight.isNotEmpty) {
           if (ingredientsText.isNotEmpty) ingredientsText += ' / ';
-          ingredientsText += 'Mitad 2: ${ingredientsRight.join(', ')}';
+
+          ingredientsText += ingredientsRight.join(', ');
         }
+
         itemWidgets.add(Text(
           ingredientsText,
           style: smallerDecoratedTextStyle.copyWith(color: colorForItem),

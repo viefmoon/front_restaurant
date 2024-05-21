@@ -15,6 +15,7 @@ import 'package:restaurante/src/presentation/pages/sales_receipts/sales/order_cr
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uuid/uuid.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class ProductPersonalizationPage extends StatefulWidget {
   final Product product;
@@ -50,10 +51,12 @@ class _ProductPersonalizationPageState
   bool _isLeftExpanded = false;
   bool _isRightExpanded = false;
   int productCount = 0; // Added to manage product count state
+  late stt.SpeechToText _speech;
 
   @override
   void initState() {
     super.initState();
+    _speech = stt.SpeechToText();
 
     productCount = widget.state.orderItems
             ?.where((item) => item.product?.id == widget.product.id)
@@ -247,17 +250,19 @@ class _ProductPersonalizationPageState
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: TextFormField(
+                controller: TextEditingController(text: comments),
                 decoration: InputDecoration(
                   labelText: 'Comentarios',
-                  labelStyle: TextStyle(
-                      fontSize: 22), // Fuente más grande para el label
+                  labelStyle: TextStyle(fontSize: 22),
                   border: OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.mic),
+                    onPressed: _listen,
+                  ),
                 ),
                 onChanged: (value) {
-                  comments = value; // Actualiza el comentario del usuario
+                  comments = value;
                 },
-                initialValue:
-                    comments, // Inicializa con el comentario existente si lo hay
               ),
             ),
           ],
@@ -683,5 +688,20 @@ class _ProductPersonalizationPageState
     }
 
     return price;
+  }
+
+  void _listen() async {
+    if (!_speech.isListening) {
+      bool available = await _speech.initialize();
+      if (available) {
+        _speech.listen(
+          onResult: (val) => setState(() {
+            comments = val.recognizedWords;
+          }),
+        );
+      }
+    } else {
+      _speech.stop();
+    }
   }
 }

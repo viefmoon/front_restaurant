@@ -6,7 +6,6 @@ import 'package:restaurante/src/presentation/widgets/DefaultButton.dart';
 import 'package:restaurante/src/presentation/widgets/DefaultIconBack.dart';
 import 'package:restaurante/src/presentation/widgets/DefaultTextField.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:restaurante/src/domain/models/Role.dart';
 
 class RegisterContent extends StatelessWidget {
@@ -159,9 +158,11 @@ class RegisterContent extends StatelessWidget {
                           if (state.formKey!.currentState!.validate()) {
                             bloc?.add(RegisterFormSubmit());
                           } else {
-                            Fluttertoast.showToast(
-                                msg: 'El formulario no es valido',
-                                toastLength: Toast.LENGTH_LONG);
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text('El formulario no es válido'),
+                              duration: Duration(seconds: 2),
+                              backgroundColor: Colors.red,
+                            ));
                           }
                         }),
                   )

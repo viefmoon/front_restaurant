@@ -5,7 +5,6 @@ import 'package:restaurante/src/presentation/pages/auth/register/bloc/RegisterEv
 import 'package:restaurante/src/presentation/pages/auth/register/bloc/RegisterState.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -36,12 +35,18 @@ class _RegisterPageState extends State<RegisterPage> {
                 listener: (context, state) {
               final responseState = state.response;
               if (responseState is Error) {
-                Fluttertoast.showToast(
-                    msg: responseState.message, toastLength: Toast.LENGTH_LONG);
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text(responseState.message),
+                  duration: Duration(seconds: 3),
+                  backgroundColor: Colors.red,
+                ));
               } else if (responseState is Success) {
                 _bloc?.add(RegisterFormReset());
-                Fluttertoast.showToast(
-                    msg: 'Registro exitoso', toastLength: Toast.LENGTH_LONG);
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text('Registro exitoso'),
+                  duration: Duration(seconds: 2),
+                  backgroundColor: Colors.green,
+                ));
               }
             }, child: BlocBuilder<RegisterBloc, RegisterState>(
                     builder: (context, state) {

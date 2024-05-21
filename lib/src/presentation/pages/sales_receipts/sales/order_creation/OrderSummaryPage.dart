@@ -36,8 +36,6 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
   String? _userRole;
   bool isButtonDisabled = false;
   late stt.SpeechToText _speech;
-  bool _isListening = false;
-  String _voiceInput = "";
 
   @override
   void initState() {
@@ -54,8 +52,11 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
   Future<void> _initSpeechToText() async {
     _speech = stt.SpeechToText();
     bool available = await _speech.initialize(
-      onStatus: (val) => print('onStatus: $val'),
-      onError: (val) => print('onError: $val'),
+      onStatus: (val) {
+        if (val == 'notListening') {
+          _speech.stop();
+        }
+      },
     );
     if (!available) {
       print(
@@ -272,6 +273,15 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
                             width: 2.0,
                           ),
                         ),
+                        suffixIcon: IconButton(
+                          icon: Icon(Icons.mic_none),
+                          onPressed: () =>
+                              _listenForField(_phoneController, (value) {
+                            BlocProvider.of<OrderCreationBloc>(context).add(
+                              PhoneNumberEntered(phoneNumber: value),
+                            );
+                          }, removeSpaces: true),
+                        ),
                       ),
                       onChanged: (value) {
                         BlocProvider.of<OrderCreationBloc>(context).add(
@@ -301,8 +311,13 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
                               BorderSide(color: Colors.green, width: 2.0),
                         ),
                         suffixIcon: IconButton(
-                          icon: Icon(_isListening ? Icons.mic : Icons.mic_none),
-                          onPressed: _listen,
+                          icon: Icon(Icons.mic_none),
+                          onPressed: () =>
+                              _listenForField(_addressController, (value) {
+                            BlocProvider.of<OrderCreationBloc>(context).add(
+                              DeliveryAddressEntered(deliveryAddress: value),
+                            );
+                          }),
                         ),
                       ),
                       onChanged: (value) {
@@ -337,6 +352,15 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
                             color: Colors.green,
                             width: 2.0,
                           ),
+                        ),
+                        suffixIcon: IconButton(
+                          icon: Icon(Icons.mic_none),
+                          onPressed: () =>
+                              _listenForField(_customerNameController, (value) {
+                            BlocProvider.of<OrderCreationBloc>(context).add(
+                              CustomerNameEntered(customerName: value),
+                            );
+                          }),
                         ),
                       ),
                       onChanged: (value) {
@@ -373,6 +397,15 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
                             width: 2.0,
                           ),
                         ),
+                        suffixIcon: IconButton(
+                          icon: Icon(Icons.mic_none),
+                          onPressed: () =>
+                              _listenForField(_phoneController, (value) {
+                            BlocProvider.of<OrderCreationBloc>(context).add(
+                              PhoneNumberEntered(phoneNumber: value),
+                            );
+                          }),
+                        ),
                       ),
                       onChanged: (value) {
                         BlocProvider.of<OrderCreationBloc>(context).add(
@@ -404,10 +437,20 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
                       borderRadius: BorderRadius.circular(8.0),
                       borderSide: BorderSide(color: Colors.green, width: 2.0),
                     ),
+                    suffixIcon: IconButton(
+                      icon: Icon(Icons.mic_none),
+                      onPressed: () =>
+                          _listenForField(_commentsController, (value) {
+                        BlocProvider.of<OrderCreationBloc>(context).add(
+                          OrderCommentsEntered(comments: value),
+                        );
+                      }),
+                    ),
                   ),
                   onChanged: (value) {
-                    BlocProvider.of<OrderCreationBloc>(context)
-                        .add(OrderCommentsEntered(comments: value));
+                    BlocProvider.of<OrderCreationBloc>(context).add(
+                      OrderCommentsEntered(comments: value),
+                    );
                   },
                 ),
               ));
@@ -974,26 +1017,28 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
     );
   }
 
-  void _listen() async {
-    if (!_isListening) {
-      bool available = await _speech.initialize(
-        onStatus: (val) => print('onStatus: $val'),
-        onError: (val) => print('onError: $val'),
-      );
+  void _listenForField(
+      TextEditingController controller, Function(String) onResultCallback,
+      {bool removeSpaces = false}) async {
+    if (!(_speech.isListening)) {
+      bool available = await _speech.initialize();
       if (available) {
-        setState(() => _isListening = true);
         _speech.listen(
-          onResult: (val) => setState(() {
-            _voiceInput = val.recognizedWords;
-            _addressController.text = _voiceInput;
-            BlocProvider.of<OrderCreationBloc>(context).add(
-              DeliveryAddressEntered(deliveryAddress: _voiceInput),
-            );
-          }),
+          onResult: (val) {
+            String processedText = val.recognizedWords;
+            // Verificar si se deben eliminar los espacios
+            if (removeSpaces) {
+              processedText = processedText.replaceAll(' ', '');
+            }
+            controller.text = processedText;
+            onResultCallback(processedText);
+          },
+          listenOptions: stt.SpeechListenOptions(
+            cancelOnError: true,
+          ),
         );
       }
     } else {
-      setState(() => _isListening = false);
       _speech.stop();
     }
   }

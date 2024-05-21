@@ -10,7 +10,6 @@ import 'src/blocProviders.dart';
 import 'src/presentation/pages/auth/login/LoginPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:restaurante/src/presentation/pages/auth/register/RegisterPage.dart';
 import 'package:timezone/data/latest.dart' as tz;
 
@@ -51,7 +50,6 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: blocProviders,
       child: MaterialApp(
-        builder: FToastBuilder(),
         debugShowCheckedModeBanner: false,
         title: 'Flutter Demo',
         theme: theme, // Usa el tema personalizado aquí

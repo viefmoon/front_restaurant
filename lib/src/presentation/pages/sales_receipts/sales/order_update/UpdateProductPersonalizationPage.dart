@@ -15,6 +15,7 @@ import 'package:restaurante/src/presentation/pages/sales_receipts/sales/order_up
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uuid/uuid.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class UpdateProductPersonalizationPage extends StatefulWidget {
   final Product product;
@@ -50,10 +51,12 @@ class _UpdateProductPersonalizationPageState
   bool _isLeftIngredientsExpanded = false;
   bool _isRightIngredientsExpanded = false;
   int productCount = 0;
+  late stt.SpeechToText _speech;
 
   @override
   void initState() {
     super.initState();
+    _speech = stt.SpeechToText();
 
     productCount = widget.state.orderItems
             ?.where((item) => item.product?.id == widget.product.id)
@@ -243,20 +246,23 @@ class _UpdateProductPersonalizationPageState
               ...widget.product.productObservationTypes!
                   .map(_buildObservationTypeSection)
                   .toList(),
-            SizedBox(height: 16.0),
+            SizedBox(height: 16.0), // Espaciado agregado arriba de comentarios
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: TextFormField(
+                controller: TextEditingController(text: comments),
                 decoration: InputDecoration(
                   labelText: 'Comentarios',
                   labelStyle: TextStyle(fontSize: 22),
                   border: OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.mic),
+                    onPressed: _listen,
+                  ),
                 ),
                 onChanged: (value) {
-                  comments = value; // Actualiza el comentario del usuario
+                  comments = value;
                 },
-                initialValue:
-                    comments, // Inicializa con el comentario existente si lo hay
               ),
             ),
           ],
@@ -676,5 +682,20 @@ class _UpdateProductPersonalizationPageState
     }
 
     return price;
+  }
+
+  void _listen() async {
+    if (!_speech.isListening) {
+      bool available = await _speech.initialize();
+      if (available) {
+        _speech.listen(
+          onResult: (val) => setState(() {
+            comments = val.recognizedWords;
+          }),
+        );
+      }
+    } else {
+      _speech.stop();
+    }
   }
 }

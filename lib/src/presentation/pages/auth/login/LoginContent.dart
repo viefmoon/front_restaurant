@@ -4,7 +4,6 @@ import 'bloc/LoginState.dart';
 import 'package:restaurante/src/presentation/utils/BlocFormItem.dart';
 import 'package:restaurante/src/presentation/widgets/DefaultTextField.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 class LoginContent extends StatelessWidget {
   LoginBloc? bloc;
@@ -120,9 +119,11 @@ class LoginContent extends StatelessWidget {
             if (state.formKey!.currentState!.validate()) {
               bloc?.add(LoginSubmit());
             } else {
-              Fluttertoast.showToast(
-                  msg: 'El formulario no es valido',
-                  toastLength: Toast.LENGTH_LONG);
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text('El formulario no es válido'),
+                duration: Duration(seconds: 2),
+                backgroundColor: Colors.red,
+              ));
             }
           },
           style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
@@ -140,7 +141,7 @@ class LoginContent extends StatelessWidget {
           label: 'Contraseña',
           color: Colors.black,
           icon: Icons.lock,
-          // errorText: snapshot.error?.toString(),
+          initialValue: state.password.value, // Usar el valor del estado
           onChanged: (text) {
             bloc?.add(PasswordChanged(password: BlocFormItem(value: text)));
           },
@@ -158,7 +159,7 @@ class LoginContent extends StatelessWidget {
           label: 'Nombre de usuario',
           color: Colors.black,
           icon: Icons.person,
-          // errorText: snapshot.error?.toString(),
+          initialValue: state.username.value, // Usar el valor del estado
           onChanged: (text) {
             bloc?.add(UsernameChanged(username: BlocFormItem(value: text)));
           },

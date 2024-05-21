@@ -339,13 +339,20 @@ class _PizzaPreparationPageState extends State<PizzaPreparationPage> {
             right: 85,
             child: Visibility(
               visible: _showAdvancePreparationCounter,
-              maintainState:
-                  true, // Asegura que el estado interno se mantenga al ocultar el widget
-              maintainSize: true, // Mantiene el tamaño del widget al ocultarlo
-              maintainAnimation: true, // Mantiene las animaciones
-              maintainInteractivity:
-                  false, // Desactiva la interactividad cuando el widget está oculto
-              child: AdvancePreparationCounter(orders: filteredOrders),
+              maintainState: true,
+              maintainSize: true,
+              maintainAnimation: true,
+              maintainInteractivity: false,
+              child: Container(
+                width: MediaQuery.of(context).size.width * 0.20,
+                height: 270,
+                decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                padding: EdgeInsets.all(8.0),
+                child: AdvancePreparationCounter(orders: filteredOrders),
+              ),
             ),
           ),
         ],
