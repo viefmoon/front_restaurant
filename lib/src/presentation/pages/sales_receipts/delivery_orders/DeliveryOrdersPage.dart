@@ -33,6 +33,7 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
     String content = '';
     String cmdFontSizeLarge =
         "\x1d\x21\x12"; // Ajusta este valor según tu impresora
+    String cmdFontSizeMedium = "\x1d\x21\x01";
     String cmdFontSizeNormal =
         "\x1d\x21\x00"; // Comando para restablecer el tamaño de la fuente a normal
 
@@ -48,7 +49,7 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
         cmdFontSizeLarge +
         'Orden #${order.id}\n\n' +
         cmdBoldOff +
-        cmdFontSizeNormal;
+        cmdFontSizeMedium;
 
     // Imprimir el tipo de orden (Entrega a domicilio)
     content += cmdAlignCenter + 'Entrega a domicilio\n\n';
@@ -58,7 +59,7 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
 
     // Imprimir detalles de la orden
     content += 'Telefono: ${order.phoneNumber}\n';
-    content += 'Direccion: ${order.deliveryAddress}\n';
+    content += 'Direccion: ${order.deliveryAddress}\n' + cmdFontSizeNormal;
 
     // Añadir la fecha de impresión del ticket formateada hasta el minuto
     content += 'Fecha: ${DateTime.now().toString().substring(0, 16)}\n';
@@ -177,7 +178,9 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
     }
 
     // Añade un mensaje de gracias después del total
-    content += cmdAlignCenter + '\n" Gracias por su preferencia "\n';
+    content += cmdAlignCenter +
+        cmdFontSizeMedium +
+        '\n" Gracias por su preferencia "\n';
 
     content += '\n\n\n';
     return content;
@@ -391,6 +394,15 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
                         ? Colors.green
                         : Colors.red;
                     break;
+                  case OrderStatus.in_preparation:
+                    statusText = 'En preparacion';
+                    textColor = Color.fromARGB(255, 221, 204, 75);
+                    paymentStatusColor = order.amountPaid != null &&
+                            order.totalCost != null &&
+                            order.amountPaid! >= order.totalCost!
+                        ? Colors.green
+                        : Colors.red;
+                    break;
                   default:
                     statusText = 'Desconocido';
                     textColor = Colors.grey;
@@ -430,16 +442,18 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
                           ),
                         ),
                         value: selectedOrders.contains(order),
-                        onChanged: (bool? value) {
-                          setState(() {
-                            if (value ?? false) {
-                              selectedOrders.add(order);
-                            } else {
-                              selectedOrders.remove(order);
-                            }
-                            getTotalCostOfSelectedOrders();
-                          });
-                        },
+                        onChanged: order.status != OrderStatus.in_preparation
+                            ? (bool? value) {
+                                setState(() {
+                                  if (value ?? false) {
+                                    selectedOrders.add(order);
+                                  } else {
+                                    selectedOrders.remove(order);
+                                  }
+                                  getTotalCostOfSelectedOrders();
+                                });
+                              }
+                            : null,
                         activeColor: Colors.green,
                         checkColor: Colors.blue,
                       ),

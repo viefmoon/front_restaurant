@@ -42,10 +42,14 @@ class _PendingOrderItemsPageState extends State<PendingOrderItemsPage> {
               itemCount: state.items.length,
               itemBuilder: (context, index) {
                 final item = state.items[index];
+                final totalProductCount = item.products
+                    .fold(0, (sum, product) => sum + product.count);
+
                 return ExpansionTile(
-                  title: Text(item.subcategoryName,
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                  title: Text(
+                    '${item.subcategoryName} ($totalProductCount)',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  ),
                   children: item.products
                       .map((product) => ListTile(
                             title: Text(

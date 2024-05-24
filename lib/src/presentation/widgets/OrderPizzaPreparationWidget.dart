@@ -322,7 +322,7 @@ class _OrderPizzaPreparationWidgetState
         LongPressGestureRecognizer:
             GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
           () =>
-              LongPressGestureRecognizer(duration: Duration(milliseconds: 500)),
+              LongPressGestureRecognizer(duration: Duration(milliseconds: 300)),
           (LongPressGestureRecognizer instance) {
             instance.onLongPress = () => _handleLongPress(widget.order);
           },
