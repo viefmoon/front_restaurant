@@ -68,23 +68,23 @@ class _PizzaHomePageState extends State<PizzaHomePage> {
               _buildIconButton(Icons.local_shipping, OrderFilterType.delivery),
               SizedBox(width: screenWidth * 0.10),
               _buildIconButton(Icons.restaurant, OrderFilterType.dineIn),
-              SizedBox(width: screenWidth * 0.15),
-              Text("ADELANTAR",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30)),
-              IconButton(
-                iconSize: 70,
-                icon: Icon(_filterByCanBePreparedInAdvance
-                    ? Icons.check_box
-                    : Icons.check_box_outline_blank),
-                onPressed: () {
-                  if (!_filterByPrepared) {
-                    setState(() {
-                      _filterByCanBePreparedInAdvance =
-                          !_filterByCanBePreparedInAdvance;
-                    });
-                  }
-                },
-              ),
+              SizedBox(width: screenWidth * 0.20),
+              // Text("ADELANTAR",
+              //     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30)),
+              // IconButton(
+              //   iconSize: 70,
+              //   icon: Icon(_filterByCanBePreparedInAdvance
+              //       ? Icons.check_box
+              //       : Icons.check_box_outline_blank),
+              //   onPressed: () {
+              //     if (!_filterByPrepared) {
+              //       setState(() {
+              //         _filterByCanBePreparedInAdvance =
+              //             !_filterByCanBePreparedInAdvance;
+              //       });
+              //     }
+              //   },
+              // ),
               SizedBox(width: screenWidth * 0.02),
               IconButton(
                 iconSize: 70,

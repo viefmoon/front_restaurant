@@ -3,6 +3,7 @@ import 'package:restaurante/src/domain/models/OrderItem.dart';
 import 'package:restaurante/src/domain/models/OrderUpdate.dart';
 import 'package:restaurante/src/domain/models/SelectedPizzaIngredient.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:restaurante/src/domain/models/Order.dart';
 import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
@@ -96,12 +97,12 @@ class _OrderPizzaPreparationWidgetState
 
   List<Color> _updateColors = [
     Color.fromRGBO(212, 17, 203, 1),
-    Color.fromARGB(255, 161, 106, 23),
+    Color.fromARGB(255, 161, 83, 23),
     Color.fromARGB(255, 134, 24, 153),
     const Color.fromARGB(255, 88, 59, 48),
     const Color.fromARGB(255, 163, 14, 63),
-    const Color.fromARGB(255, 172, 139, 42),
-    const Color.fromARGB(255, 4, 78, 42)
+    Color.fromARGB(255, 138, 114, 39),
+    Color.fromARGB(255, 12, 23, 18)
   ];
 
   @override
@@ -292,11 +293,11 @@ class _OrderPizzaPreparationWidgetState
   Color _getColorByOrderType(OrderType? type) {
     switch (type) {
       case OrderType.delivery:
-        return Colors.brown;
+        return Color(0xFFFFDAB9); // Pastel Orange
       case OrderType.dineIn:
-        return Colors.green;
+        return Color(0xFF98FB98); // Pastel Green
       case OrderType.pickUpWait:
-        return Colors.orange;
+        return Color.fromARGB(255, 244, 184, 244); // Pastel Violet
       default:
         return Colors.grey;
     }
@@ -309,50 +310,58 @@ class _OrderPizzaPreparationWidgetState
       case OrderPreparationStatus.in_preparation:
         return Colors.lightGreen[100]!;
       case OrderPreparationStatus.prepared:
-        return Colors.amber[100]!;
+        return Color.fromARGB(255, 244, 156, 148);
       default:
         return Colors.white;
     }
   }
 
   Widget _OrderHeaderGestureDetector({required Widget child}) {
-    return GestureDetector(
-      onHorizontalDragStart: (details) {
-        _initialSwipeX = details.globalPosition.dx;
+    return RawGestureDetector(
+      gestures: {
+        LongPressGestureRecognizer:
+            GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
+          () =>
+              LongPressGestureRecognizer(duration: Duration(milliseconds: 500)),
+          (LongPressGestureRecognizer instance) {
+            instance.onLongPress = () => _handleLongPress(widget.order);
+          },
+        ),
       },
-      onHorizontalDragUpdate: (details) {
-        _swipeDistanceX = details.globalPosition.dx - _initialSwipeX;
-      },
-      onHorizontalDragEnd: (details) {
-        if (_swipeDistanceX.abs() > _swipeThreshold) {
-          if (_swipeDistanceX > 0) {
-            widget.onOrderGesture(widget.order, 'swipe_right');
-          } else {
-            widget.onOrderGesture(widget.order, 'swipe_left');
+      child: GestureDetector(
+        onHorizontalDragStart: (details) {
+          _initialSwipeX = details.globalPosition.dx;
+        },
+        onHorizontalDragUpdate: (details) {
+          _swipeDistanceX = details.globalPosition.dx - _initialSwipeX;
+        },
+        onHorizontalDragEnd: (details) {
+          if (_swipeDistanceX.abs() > _swipeThreshold) {
+            if (_swipeDistanceX > 0) {
+              widget.onOrderGesture(widget.order, 'swipe_right');
+            } else {
+              widget.onOrderGesture(widget.order, 'swipe_left');
+            }
           }
-        }
-        _swipeDistanceX = 0.0;
-      },
-      onLongPress: () => _handleLongPress(widget.order),
-      child: child,
+          _swipeDistanceX = 0.0;
+        },
+        child: child,
+      ),
     );
   }
 
   void _handleLongPress(Order order) {
-    // Aquí implementas la lógica para cambiar el estado del pedido
-    // basado en su estado actual
     String newStatus;
     if (order.pizzaPreparationStatus == OrderPreparationStatus.created ||
         order.pizzaPreparationStatus == OrderPreparationStatus.in_preparation) {
-      newStatus = 'swipe_to_prepared'; // Define un nuevo tipo de gesto
+      newStatus = 'swipe_to_prepared';
     } else if (order.pizzaPreparationStatus ==
         OrderPreparationStatus.prepared) {
-      newStatus = 'swipe_to_in_preparation'; // Define otro tipo de gesto
+      newStatus = 'swipe_to_in_preparation';
     } else {
-      return; // No hagas nada si el pedido no está en un estado que pueda cambiar
+      return;
     }
 
-    // Llama al callback proporcionado al widget con el nuevo estado
     widget.onOrderGesture(order, newStatus);
   }
 
@@ -398,7 +407,8 @@ class _OrderPizzaPreparationWidgetState
 
       return Container(
         width: double.infinity,
-        color: Color.fromARGB(255, 222, 226, 235),
+        color: _getColorByOrderType(
+            widget.order.orderType), // Set color based on order type
         padding: EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

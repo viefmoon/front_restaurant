@@ -7,7 +7,7 @@ import 'package:restaurante/src/presentation/pages/preparation/pizza/bloc/PizzaP
 import 'package:restaurante/src/presentation/pages/preparation/pizza/bloc/PizzaPreparationBloc.dart';
 import 'package:restaurante/src/presentation/pages/preparation/pizza/home/bloc/PizzaHomeState.dart';
 import 'package:restaurante/src/presentation/widgets/OrderPizzaPreparationWidget.dart';
-import 'package:restaurante/src/presentation/widgets/AdvancePreparationCounter.dart'; // Added import for the new widget
+import 'package:restaurante/src/presentation/widgets/PizzaPreparationPendingCounter.dart'; // Added import for the new widget
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/services.dart';
@@ -351,7 +351,7 @@ class _PizzaPreparationPageState extends State<PizzaPreparationPage> {
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 padding: EdgeInsets.all(8.0),
-                child: AdvancePreparationCounter(orders: filteredOrders),
+                child: PizzaPreparationPendingCounter(orders: filteredOrders),
               ),
             ),
           ),

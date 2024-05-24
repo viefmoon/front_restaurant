@@ -90,12 +90,12 @@ class _OrderBurgerPreparationWidgetState
 
   List<Color> _updateColors = [
     Color.fromRGBO(212, 17, 203, 1),
-    Color.fromARGB(255, 161, 106, 23),
+    Color.fromARGB(255, 161, 83, 23),
     Color.fromARGB(255, 134, 24, 153),
     const Color.fromARGB(255, 88, 59, 48),
     const Color.fromARGB(255, 163, 14, 63),
-    const Color.fromARGB(255, 172, 139, 42),
-    const Color.fromARGB(255, 4, 78, 42)
+    Color.fromARGB(255, 138, 114, 39),
+    Color.fromARGB(255, 12, 23, 18)
   ];
 
   @override
@@ -286,11 +286,11 @@ class _OrderBurgerPreparationWidgetState
   Color _getColorByOrderType(OrderType? type) {
     switch (type) {
       case OrderType.delivery:
-        return Colors.brown;
+        return Color(0xFFFFDAB9); // Pastel Orange
       case OrderType.dineIn:
-        return Colors.green;
+        return Color(0xFF98FB98); // Pastel Green
       case OrderType.pickUpWait:
-        return Colors.orange;
+        return Color.fromARGB(255, 244, 184, 244); // Pastel Violet
       default:
         return Colors.grey;
     }
@@ -303,7 +303,7 @@ class _OrderBurgerPreparationWidgetState
       case OrderPreparationStatus.in_preparation:
         return Colors.lightGreen[100]!;
       case OrderPreparationStatus.prepared:
-        return Colors.amber[100]!;
+        return Color.fromARGB(255, 244, 156, 148);
       default:
         return Colors.white;
     }
@@ -379,7 +379,7 @@ class _OrderBurgerPreparationWidgetState
 
       return Container(
         width: double.infinity,
-        color: Color.fromARGB(255, 222, 226, 235),
+        color: _getColorByOrderType(widget.order.orderType),
         padding: EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
