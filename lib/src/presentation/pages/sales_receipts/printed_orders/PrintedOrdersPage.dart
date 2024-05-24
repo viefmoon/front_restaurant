@@ -15,6 +15,13 @@ class PrintedOrdersPage extends StatefulWidget {
 class _PrintedOrdersPageState extends State<PrintedOrdersPage> {
   List<Order> selectedOrders = [];
 
+  String _formatPrintTime(DateTime? printTime) {
+    if (printTime == null) {
+      return '';
+    }
+    return DateFormat('yyyy-MM-dd HH:mm').format(printTime.toLocal());
+  }
+
   @override
   void initState() {
     super.initState();
@@ -118,7 +125,7 @@ class _PrintedOrdersPageState extends State<PrintedOrdersPage> {
                 if (order.orderPrints != null) {
                   for (var print in order.orderPrints!) {
                     printDetails +=
-                        'Impreso por: ${print.printedBy}, ${DateFormat('yyyy-MM-dd HH:mm').format(print.printTime ?? DateTime.now())}\n';
+                        'Impreso por: ${print.printedBy}, ${_formatPrintTime(print.printTime)}\n';
                   }
                 }
                 return CheckboxListTile(

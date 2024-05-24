@@ -131,18 +131,30 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
                 final order = state.orders![index];
                 String statusText;
                 Color textColor;
+                Color paymentStatusColor;
                 switch (order.status) {
                   case OrderStatus.prepared:
                     statusText = 'Preparado';
                     textColor = Colors.green;
+                    paymentStatusColor = order.amountPaid != null &&
+                            order.totalCost != null &&
+                            order.amountPaid! >= order.totalCost!
+                        ? Colors.green
+                        : Colors.red;
                     break;
                   case OrderStatus.in_delivery:
                     statusText = 'En reparto';
                     textColor = Colors.blue;
+                    paymentStatusColor = order.amountPaid != null &&
+                            order.totalCost != null &&
+                            order.amountPaid! >= order.totalCost!
+                        ? Colors.green
+                        : Colors.red;
                     break;
                   default:
                     statusText = 'Desconocido';
                     textColor = Colors.grey;
+                    paymentStatusColor = Colors.grey;
                 }
                 return CheckboxListTile(
                   title: Text(
@@ -151,11 +163,28 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
                         color: textColor,
                         fontSize: 22), // Aumenta el tamaño aquí
                   ),
-                  subtitle: Text(
-                    'Total: \$${order.totalCost?.toStringAsFixed(2) ?? ''} - Estado: $statusText',
-                    style: TextStyle(
-                        color: textColor,
-                        fontSize: 22), // Aumenta el tamaño aquí
+                  subtitle: RichText(
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text:
+                              'Total: \$${order.totalCost?.toStringAsFixed(2) ?? ''} - Estado: $statusText',
+                          style: TextStyle(
+                              color: textColor,
+                              fontSize: 22), // Aumenta el tamaño aquí
+                        ),
+                        TextSpan(
+                          text: order.amountPaid != null &&
+                                  order.totalCost != null &&
+                                  order.amountPaid! >= order.totalCost!
+                              ? ' (PAGADO)'
+                              : ' (NO PAGADO)',
+                          style: TextStyle(
+                              color: paymentStatusColor,
+                              fontSize: 22), // Aumenta el tamaño aquí
+                        ),
+                      ],
+                    ),
                   ),
                   value: selectedOrders.contains(order),
                   onChanged: (bool? value) {

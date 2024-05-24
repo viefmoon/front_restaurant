@@ -241,11 +241,21 @@ class _OrderUpdatePageState extends State<OrderUpdatePage> {
   Widget _buildBody(BuildContext context) {
     return BlocBuilder<OrderUpdateBloc, OrderUpdateState>(
       builder: (context, state) {
-        _phoneController.text = state.phoneNumber ?? "";
-        _addressController.text = state.deliveryAddress ?? "";
-        _customerNameController.text = state.customerName ?? "";
-        _commentsController.text = state.comments ?? "";
-        _tempTableController.text = state.temporaryIdentifier ?? "";
+        if (_phoneController.text != state.phoneNumber) {
+          _phoneController.text = state.phoneNumber ?? "";
+        }
+        if (_addressController.text != state.deliveryAddress) {
+          _addressController.text = state.deliveryAddress ?? "";
+        }
+        if (_customerNameController.text != state.customerName) {
+          _customerNameController.text = state.customerName ?? "";
+        }
+        if (_commentsController.text != state.comments) {
+          _commentsController.text = state.comments ?? "";
+        }
+        if (_tempTableController.text != state.temporaryIdentifier) {
+          _tempTableController.text = state.temporaryIdentifier ?? "";
+        }
 
         List<Widget> headerDetails = [];
         headerDetails.add(Padding(
@@ -1353,6 +1363,8 @@ class _OrderUpdatePageState extends State<OrderUpdatePage> {
       BuildContext context, double totalCost, OrderUpdateState state) {
     final TextEditingController _paymentController = TextEditingController();
     double _amountPaid = 0.0;
+    double alreadyPaid = state.selectedOrder?.amountPaid ?? 0.0;
+    double remainingAmount = totalCost - alreadyPaid;
 
     showDialog(
       context: context,
@@ -1371,6 +1383,20 @@ class _OrderUpdatePageState extends State<OrderUpdatePage> {
                       fontSize: 20,
                     ),
                   ),
+                  if (alreadyPaid > 0)
+                    Text(
+                      'Pagado: \$${alreadyPaid.toStringAsFixed(2)}',
+                      style: TextStyle(
+                        fontSize: 16,
+                      ),
+                    ),
+                  if (alreadyPaid > 0)
+                    Text(
+                      'Restante: \$${remainingAmount.toStringAsFixed(2)}',
+                      style: TextStyle(
+                        fontSize: 16,
+                      ),
+                    ),
                   TextField(
                     controller: _paymentController,
                     keyboardType:
@@ -1386,9 +1412,9 @@ class _OrderUpdatePageState extends State<OrderUpdatePage> {
                     },
                   ),
                   SizedBox(height: 20),
-                  if (_amountPaid >= totalCost)
+                  if (_amountPaid >= remainingAmount)
                     Text(
-                      'Cambio: \$${(_amountPaid - totalCost).toStringAsFixed(2)}',
+                      'Cambio: \$${(_amountPaid - remainingAmount).toStringAsFixed(2)}',
                       style: TextStyle(
                         fontSize: 16,
                       ),
@@ -1396,47 +1422,59 @@ class _OrderUpdatePageState extends State<OrderUpdatePage> {
                 ],
               ),
               actions: <Widget>[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: Text('Cancelar'),
-                    ),
-                    TextButton(
-                      onPressed: _amountPaid >= totalCost
-                          ? () {
-                              if (state.selectedOrder?.id != null) {
-                                BlocProvider.of<OrderUpdateBloc>(context).add(
-                                  RegisterPayment(
-                                    orderId: state.selectedOrder!.id!,
-                                    amount: totalCost,
-                                  ),
-                                );
-                                Navigator.pop(
-                                    context); // Cierra la página actual antes de navegar
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => OrderUpdatePage(),
-                                  ),
-                                );
-                              }
-                            }
-                          : null,
-                      child: Text('Registrar Pago'),
-                      style: ButtonStyle(
-                        foregroundColor:
-                            MaterialStateProperty.resolveWith<Color?>(
-                          (Set<MaterialState> states) {
-                            if (states.contains(MaterialState.disabled))
-                              return Colors.grey;
-                            return null;
-                          },
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text('Cancelar'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    _paymentController.clear();
+                    setState(() {
+                      _amountPaid = 0.0;
+                    });
+                    if (state.selectedOrder?.id != null) {
+                      BlocProvider.of<OrderUpdateBloc>(context).add(
+                        RegisterPayment(
+                          orderId: state.selectedOrder!.id!,
+                          amount: 0.0,
                         ),
-                      ),
+                      );
+                    }
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Borrar Pago'),
+                ),
+                TextButton(
+                  onPressed: _amountPaid >= remainingAmount
+                      ? () {
+                          if (state.selectedOrder?.id != null) {
+                            BlocProvider.of<OrderUpdateBloc>(context).add(
+                              RegisterPayment(
+                                orderId: state.selectedOrder!.id!,
+                                amount: totalCost,
+                              ),
+                            );
+                            Navigator.pop(
+                                context); // Cierra la página actual antes de navegar
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => OrderUpdatePage(),
+                              ),
+                            );
+                          }
+                        }
+                      : null,
+                  child: Text('Registrar Pago'),
+                  style: ButtonStyle(
+                    foregroundColor: MaterialStateProperty.resolveWith<Color?>(
+                      (Set<MaterialState> states) {
+                        if (states.contains(MaterialState.disabled))
+                          return Colors.grey;
+                        return null;
+                      },
                     ),
-                  ],
+                  ),
                 ),
               ],
             );
@@ -1696,20 +1734,37 @@ class _OrderUpdatePageState extends State<OrderUpdatePage> {
     content +=
         '--------------------------------\n'; // Línea de separación con guiones
 
+    content +=
+        '--------------------------------\n'; // Línea de separación con guiones
+
     content += cmdFontSizeLarge +
-        'Total: \$${calculateTotal(state.orderItems, state.orderAdjustments).toStringAsFixed(2)}\n' +
+        'Total: \$${calculateTotal(state.orderItems, state.orderAdjustments).toStringAsFixed(2)}\n';
+
+    // Verifica si hay un pago registrado
+    if (state.selectedOrder != null) {
+      double amountPaid = state.selectedOrder!.amountPaid ?? 0;
+      double total = calculateTotal(state.orderItems, state.orderAdjustments);
+      double remaining = total - amountPaid;
+
+      if (amountPaid > 0) {
+        content += 'Pagado: \$${amountPaid.toStringAsFixed(2)}\n';
+        content += 'Resto: \$${remaining.toStringAsFixed(2)}\n';
+      }
+    }
+
+    content +=
         cmdFontSizeNormal; // Restablece el tamaño de la fuente a normal después del total
 
-    // Añade un mensaje de gracias después del total
+// Añade un mensaje de gracias después del total
     content += cmdAlignCenter +
         cmdFontSizeMedium +
-        '\n" Gracias "\n' +
+        '\n" Gracias por su preferencia "\n' +
         cmdFontSizeNormal;
 
-    // Restablece la alineación a la izquierda después del mensaje de gracias
+// Restablece la alineación a la izquierda después del mensaje de gracias
     content += cmdAlignLeft;
 
-    content += '\n\n';
+    content += '\n\n\n';
     return content;
   }
 

@@ -237,11 +237,38 @@ class _OpenOrdersPageState extends State<OpenOrdersPage> {
                           ' - Estado: ${_translateOrderStatus(order.status)}';
                       Color statusColor = _getStatusColor(order.status);
 
+                      // Agrega la información de si la orden está pagada o no
+                      String paymentStatusText = order.amountPaid != null &&
+                              order.totalCost != null &&
+                              order.amountPaid! >= order.totalCost!
+                          ? ' - PAGADA'
+                          : ' - NO PAGADA';
+                      Color paymentStatusColor = order.amountPaid != null &&
+                              order.totalCost != null &&
+                              order.amountPaid! >= order.totalCost!
+                          ? Colors.green
+                          : Colors.red;
+
                       return ListTile(
                         title: Text(title, style: TextStyle(fontSize: 20)),
-                        subtitle: Text(
-                            subtitle + scheduledDeliveryTimeText + statusText,
-                            style: TextStyle(color: statusColor, fontSize: 18)),
+                        subtitle: RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: subtitle +
+                                    scheduledDeliveryTimeText +
+                                    statusText,
+                                style:
+                                    TextStyle(color: statusColor, fontSize: 18),
+                              ),
+                              TextSpan(
+                                text: paymentStatusText,
+                                style: TextStyle(
+                                    color: paymentStatusColor, fontSize: 18),
+                              ),
+                            ],
+                          ),
+                        ),
                         onTap: () {
                           // Emitir el evento al BLoC con la orden seleccionada
                           bloc.add(OrderSelectedForUpdate(order));
@@ -270,11 +297,18 @@ class _OpenOrdersPageState extends State<OpenOrdersPage> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          bloc.add(LoadOpenOrders());
-        },
-        child: Icon(Icons.refresh),
+      floatingActionButton: Container(
+        width: 75.0, // Ajusta el ancho según sea necesario
+        height: 75.0, // Ajusta la altura según sea necesario
+        child: FloatingActionButton(
+          onPressed: () {
+            bloc.add(LoadOpenOrders());
+          },
+          child: Icon(
+            Icons.refresh,
+            size: 36.0, // Tamaño del ícono
+          ),
+        ),
       ),
     );
   }

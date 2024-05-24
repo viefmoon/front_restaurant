@@ -144,11 +144,21 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
           ),
           body: BlocBuilder<OrderCreationBloc, OrderCreationState>(
             builder: (context, state) {
-              _phoneController.text = state.phoneNumber ?? "";
-              _addressController.text = state.deliveryAddress ?? "";
-              _customerNameController.text = state.customerName ?? "";
-              _commentsController.text = state.comments ?? "";
-              _tempTableController.text = state.temporaryIdentifier ?? "";
+              if (_phoneController.text != state.phoneNumber) {
+                _phoneController.text = state.phoneNumber ?? "";
+              }
+              if (_addressController.text != state.deliveryAddress) {
+                _addressController.text = state.deliveryAddress ?? "";
+              }
+              if (_customerNameController.text != state.customerName) {
+                _customerNameController.text = state.customerName ?? "";
+              }
+              if (_commentsController.text != state.comments) {
+                _commentsController.text = state.comments ?? "";
+              }
+              if (_tempTableController.text != state.temporaryIdentifier) {
+                _tempTableController.text = state.temporaryIdentifier ?? "";
+              }
 
               List<Widget> headerDetails = [];
               headerDetails.add(Padding(
