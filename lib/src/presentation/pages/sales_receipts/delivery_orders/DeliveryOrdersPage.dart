@@ -15,6 +15,8 @@ class DeliveryOrdersPage extends StatefulWidget {
 
 class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
   List<Order> selectedOrders = [];
+  bool filterDelivery = false;
+  bool filterPickUpWait = false;
 
   @override
   void initState() {
@@ -27,6 +29,19 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
   double getTotalCostOfSelectedOrders() {
     return selectedOrders.fold(
         0.0, (sum, order) => sum + (order.totalCost ?? 0.0));
+  }
+
+  List<Order> _filterOrders(List<Order> orders) {
+    if (filterDelivery) {
+      return orders
+          .where((order) => order.orderType == OrderType.delivery)
+          .toList();
+    } else if (filterPickUpWait) {
+      return orders
+          .where((order) => order.orderType == OrderType.pickUpWait)
+          .toList();
+    }
+    return orders;
   }
 
   String _generateTicketContent(Order order) {
@@ -44,6 +59,9 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
     // Comando para centrar el texto
     String cmdAlignCenter = "\x1b\x61\x01";
 
+    // Comando para alinear el texto a la izquierda
+    String cmdAlignLeft = "\x1b\x61\x00";
+
     // Añadir "Orden" con el tamaño de fuente grande y en negrita
     content += cmdBoldOn +
         cmdFontSizeLarge +
@@ -51,15 +69,42 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
         cmdBoldOff +
         cmdFontSizeMedium;
 
-    // Imprimir el tipo de orden (Entrega a domicilio)
-    content += cmdAlignCenter + 'Entrega a domicilio\n\n';
+    // Imprimir el tipo de orden
+    switch (order.orderType) {
+      case OrderType.delivery:
+        content += cmdAlignCenter + 'Entrega a domicilio\n\n';
+        break;
+      case OrderType.dineIn:
+        content += cmdAlignCenter + 'Comer Dentro\n\n';
+        break;
+      case OrderType.pickUpWait:
+        content += cmdAlignCenter + 'Llevar/Esperar\n\n';
+        break;
+      default:
+        content += cmdAlignCenter + 'Tipo de orden desconocido\n\n';
+        break;
+    }
 
     // Alinear los detalles de la orden a la izquierda
-    content += "\x1b\x61\x00"; // Comando para alinear el texto a la izquierda
+    content += cmdAlignLeft;
 
     // Imprimir detalles de la orden
-    content += 'Telefono: ${order.phoneNumber}\n';
-    content += 'Direccion: ${order.deliveryAddress}\n' + cmdFontSizeNormal;
+    switch (order.orderType) {
+      case OrderType.delivery:
+        content += 'Telefono: ${order.phoneNumber}\n';
+        content += 'Direccion: ${order.deliveryAddress}\n' + cmdFontSizeNormal;
+        break;
+      case OrderType.dineIn:
+        content += 'Area: ${order.area?.name}\n';
+        content += 'Mesa: ${order.table?.number}\n' + cmdFontSizeNormal;
+        break;
+      case OrderType.pickUpWait:
+        content += 'Nombre del Cliente: ${order.customerName}\n';
+        content += 'Telefono: ${order.phoneNumber}\n' + cmdFontSizeNormal;
+        break;
+      default:
+        break;
+    }
 
     // Añadir la fecha de impresión del ticket formateada hasta el minuto
     content += 'Fecha: ${DateTime.now().toString().substring(0, 16)}\n';
@@ -69,15 +114,12 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
     // Imprimir los detalles de los productos de la orden
     order.orderItems?.forEach((item) {
       final int lineWidth = 32; // Ajusta según el ancho de tu impresora
-      // Determina si se debe usar el nombre de la variante o el nombre del producto
       String productName =
           item.productVariant?.name ?? item.product?.name ?? '';
       String productPrice = '\$${item.price?.toStringAsFixed(2) ?? ''}';
 
       // Calcula el espacio máximo disponible para el nombre del producto o variante
-      int maxProductNameLength = lineWidth -
-          productPrice.length -
-          1; // -1 por el espacio entre nombre y precio
+      int maxProductNameLength = lineWidth - productPrice.length - 1;
 
       // Trunca el nombre del producto o variante si es necesario
       if (productName.length > maxProductNameLength) {
@@ -143,6 +185,7 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
         content += addPrefixToEachLine(ingredientsText, detailPrefix) + '\n';
       }
     });
+
     // Procesamiento de los ajustes de la orden
     order.orderAdjustments?.forEach((adjustment) {
       final int lineWidth = 32;
@@ -280,51 +323,66 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
       appBar: AppBar(
         title: Text('Pedidos para Llevar'),
         actions: <Widget>[
-          if (selectedOrders.isNotEmpty &&
-              selectedOrders
-                  .any((order) => order.status == OrderStatus.in_delivery))
-            IconButton(
-              icon: Icon(Icons.undo, size: 40),
-              onPressed: () {
-                // Revertir las órdenes seleccionadas a "Preparado"
-                bloc.add(RevertOrdersToPrepared(selectedOrders
-                    .where((order) => order.status == OrderStatus.in_delivery)
-                    .toList()));
-                setState(() {
-                  selectedOrders.removeWhere(
-                      (order) => order.status == OrderStatus.in_delivery);
-                });
-              },
-            ),
           if (selectedOrders.isNotEmpty)
-            SizedBox(width: 20), // Espacio entre iconos
-          if (selectedOrders.isNotEmpty)
-            IconButton(
-              icon: Icon(Icons.send, size: 40),
-              onPressed: () {
-                // Asegurarse de enviar las órdenes seleccionadas antes de limpiar la lista
-                bloc.add(MarkOrdersAsInDelivery(List.from(selectedOrders)));
-                setState(() {
-                  selectedOrders.clear();
-                });
-              },
-            ),
-          if (selectedOrders.isNotEmpty)
-            SizedBox(width: 20), // Espacio entre iconos
-          if (selectedOrders.isNotEmpty &&
-              selectedOrders
-                  .any((order) => order.status == OrderStatus.in_delivery))
             IconButton(
               icon: Icon(Icons.check_circle, size: 40),
-              onPressed: () {
-                // Marcar las órdenes seleccionadas como entregadas
-                bloc.add(MarkOrdersAsDelivered(selectedOrders
-                    .where((order) => order.status == OrderStatus.in_delivery)
-                    .toList()));
-                setState(() {
-                  selectedOrders.removeWhere(
-                      (order) => order.status == OrderStatus.in_delivery);
-                });
+              onPressed: () async {
+                // Verificar si alguna de las órdenes seleccionadas no está en estado 'Preparado'
+                bool hasUnpreparedOrders = selectedOrders
+                    .any((order) => order.status != OrderStatus.prepared);
+                if (hasUnpreparedOrders) {
+                  // Mostrar diálogo de confirmación
+                  bool confirm = await showDialog<bool>(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text('Confirmar acción',
+                                style: TextStyle(fontSize: 24)),
+                            content: Text(
+                                'Algunas de las órdenes seleccionadas no están preparadas. ¿Desea continuar?',
+                                style: TextStyle(fontSize: 20)),
+                            actions: <Widget>[
+                              TextButton(
+                                child:
+                                    Text('No', style: TextStyle(fontSize: 22)),
+                                onPressed: () {
+                                  Navigator.of(context)
+                                      .pop(false); // No continuar
+                                },
+                              ),
+                              TextButton(
+                                child:
+                                    Text('Sí', style: TextStyle(fontSize: 22)),
+                                onPressed: () {
+                                  Navigator.of(context)
+                                      .pop(true); // Sí continuar
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      ) ??
+                      false; // Asumir 'No' si se cierra el diálogo
+
+                  if (!confirm)
+                    return; // Si el usuario no confirma, detener la acción
+                }
+
+                // Proceder con la acción original si todas las órdenes están preparadas o el usuario confirmó
+                if (selectedOrders.isNotEmpty) {
+                  bloc.add(MarkOrdersAsDelivered(List.from(selectedOrders)));
+                  setState(() {
+                    selectedOrders.clear();
+                  });
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                          'No hay órdenes seleccionadas para marcar como entregadas.'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                }
               },
             ),
           Padding(
@@ -338,112 +396,197 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
           ),
         ],
       ),
-      body: BlocConsumer<DeliveryOrdersBloc, DeliveryOrdersState>(
-        listener: (context, state) {
-          if (state.response is Success) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'Operación realizada con éxito.',
-                  style: TextStyle(fontSize: 18, color: Colors.white),
-                ),
-                backgroundColor: Colors.green,
-                duration: Duration(seconds: 2),
-              ),
-            );
-          } else if (state.response is Error) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'Error: ${(state.response as Error).message}',
-                  style: TextStyle(fontSize: 18, color: Colors.white),
-                ),
-                backgroundColor: Colors.red,
-                duration: Duration(seconds: 2),
-              ),
-            );
-          }
-        },
-        builder: (context, state) {
-          if (state.response is Loading) {
-            return Center(child: CircularProgressIndicator());
-          } else if (state.orders?.isNotEmpty ?? false) {
-            return ListView.builder(
-              itemCount: state.orders!.length,
-              itemBuilder: (context, index) {
-                final order = state.orders![index];
-                String statusText;
-                Color textColor;
-                Color paymentStatusColor;
-                switch (order.status) {
-                  case OrderStatus.prepared:
-                    statusText = 'Preparado';
-                    textColor = Colors.green;
-                    paymentStatusColor = order.amountPaid != null &&
-                            order.totalCost != null &&
-                            order.amountPaid! >= order.totalCost!
-                        ? Colors.green
-                        : Colors.red;
-                    break;
-                  case OrderStatus.in_delivery:
-                    statusText = 'En reparto';
-                    textColor = Colors.blue;
-                    paymentStatusColor = order.amountPaid != null &&
-                            order.totalCost != null &&
-                            order.amountPaid! >= order.totalCost!
-                        ? Colors.green
-                        : Colors.red;
-                    break;
-                  case OrderStatus.in_preparation:
-                    statusText = 'En preparacion';
-                    textColor = Color.fromARGB(255, 221, 204, 75);
-                    paymentStatusColor = order.amountPaid != null &&
-                            order.totalCost != null &&
-                            order.amountPaid! >= order.totalCost!
-                        ? Colors.green
-                        : Colors.red;
-                    break;
-                  default:
-                    statusText = 'Desconocido';
-                    textColor = Colors.grey;
-                    paymentStatusColor = Colors.grey;
+      body: Column(
+        children: [
+          CheckboxListTile(
+            title: Text('Filtrar a Domicilio'),
+            value: filterDelivery,
+            onChanged: (bool? value) {
+              setState(() {
+                filterDelivery = value!;
+                filterPickUpWait = false;
+              });
+            },
+          ),
+          CheckboxListTile(
+            title: Text('Filtrar Pasan/Esperan'),
+            value: filterPickUpWait,
+            onChanged: (bool? value) {
+              setState(() {
+                filterPickUpWait = value!;
+                filterDelivery = false;
+              });
+            },
+          ),
+          Expanded(
+            child: BlocConsumer<DeliveryOrdersBloc, DeliveryOrdersState>(
+              listener: (context, state) {
+                if (state.response is Success) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Operación realizada con éxito.',
+                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      ),
+                      backgroundColor: Colors.green,
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                } else if (state.response is Error) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Error: ${(state.response as Error).message}',
+                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      ),
+                      backgroundColor: Colors.red,
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
                 }
-                return Row(
-                  children: [
-                    Expanded(
-                      child: CheckboxListTile(
-                        title: Text(
-                          '#${order.id} - ${order.deliveryAddress}, Tel: ${order.phoneNumber}',
-                          style: TextStyle(
-                              color: textColor,
-                              fontSize: 22), // Aumenta el tamaño aquí
-                        ),
-                        subtitle: RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text:
-                                    'Total: \$${order.totalCost?.toStringAsFixed(2) ?? ''} - Estado: $statusText',
-                                style: TextStyle(
-                                    color: textColor,
-                                    fontSize: 22), // Aumenta el tamaño aquí
+              },
+              builder: (context, state) {
+                if (state.response is Loading) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (state.orders?.isNotEmpty ?? false) {
+                  List<Order> filteredOrders = _filterOrders(state.orders!);
+                  return ListView.builder(
+                    itemCount: filteredOrders.length,
+                    itemBuilder: (context, index) {
+                      final order = filteredOrders[index];
+                      String statusText;
+                      Color textColor;
+                      Color paymentStatusColor;
+                      switch (order.status) {
+                        case OrderStatus.created:
+                          statusText = 'Creado';
+                          textColor = Colors.blue;
+                          paymentStatusColor = order.amountPaid != null &&
+                                  order.totalCost != null &&
+                                  order.amountPaid! >= order.totalCost!
+                              ? Colors.green
+                              : Colors.red;
+                          break;
+                        case OrderStatus.prepared:
+                          statusText = 'Preparado';
+                          textColor = Colors.green;
+                          paymentStatusColor = order.amountPaid != null &&
+                                  order.totalCost != null &&
+                                  order.amountPaid! >= order.totalCost!
+                              ? Colors.green
+                              : Colors.red;
+                          break;
+                        case OrderStatus.in_preparation:
+                          statusText = 'En preparacion';
+                          textColor = Color.fromARGB(255, 221, 204, 75);
+                          paymentStatusColor = order.amountPaid != null &&
+                                  order.totalCost != null &&
+                                  order.amountPaid! >= order.totalCost!
+                              ? Colors.green
+                              : Colors.red;
+                          break;
+                        default:
+                          statusText = 'Desconocido';
+                          textColor = Colors.grey;
+                          paymentStatusColor = Colors.grey;
+                      }
+
+                      // Determine the display text based on the order type
+                      String displayText;
+                      if (order.orderType == OrderType.pickUpWait) {
+                        displayText =
+                            '#${order.id} - ${order.customerName}, Tel: ${order.phoneNumber}';
+                      } else {
+                        displayText =
+                            '#${order.id} - ${order.deliveryAddress}, Tel: ${order.phoneNumber}';
+                      }
+
+                      return Row(
+                        children: [
+                          Expanded(
+                            child: InkWell(
+                              onTap: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      content: SingleChildScrollView(
+                                        child: ListBody(
+                                          children:
+                                              order.orderItems!.map((item) {
+                                            return Text(
+                                                '${item.product?.name ?? ''}',
+                                                style: TextStyle(
+                                                    fontSize:
+                                                        22)); // Increased font size
+                                          }).toList(),
+                                        ),
+                                      ),
+                                      actions: <Widget>[
+                                        TextButton(
+                                          child: Text('Cerrar',
+                                              style: TextStyle(
+                                                  fontSize:
+                                                      22)), // Increased font size
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      displayText,
+                                      style: TextStyle(
+                                        color: textColor,
+                                        fontSize: 22,
+                                      ),
+                                    ),
+                                    SizedBox(height: 8),
+                                    RichText(
+                                      text: TextSpan(
+                                        children: [
+                                          TextSpan(
+                                            text:
+                                                'Total: \$${order.totalCost?.toStringAsFixed(2) ?? ''} - Creacion: ${order.creationDate != null ? '${order.creationDate!.toLocal().hour}:${order.creationDate!.toLocal().minute}' : ''} - Estado: $statusText',
+                                            style: TextStyle(
+                                              color: textColor,
+                                              fontSize: 22,
+                                            ),
+                                          ),
+                                          TextSpan(
+                                            text: order.amountPaid != null &&
+                                                    order.totalCost != null &&
+                                                    order.amountPaid! >=
+                                                        order.totalCost!
+                                                ? ' (PAGADO)'
+                                                : ' (NO PAGADO)',
+                                            style: TextStyle(
+                                              color: paymentStatusColor,
+                                              fontSize: 22,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                              TextSpan(
-                                text: order.amountPaid != null &&
-                                        order.totalCost != null &&
-                                        order.amountPaid! >= order.totalCost!
-                                    ? ' (PAGADO)'
-                                    : ' (NO PAGADO)',
-                                style: TextStyle(
-                                    color: paymentStatusColor,
-                                    fontSize: 22), // Aumenta el tamaño aquí
-                              ),
-                            ],
+                            ),
                           ),
-                        ),
-                        value: selectedOrders.contains(order),
-                        onChanged: order.status != OrderStatus.in_preparation
-                            ? (bool? value) {
+                          Transform.scale(
+                            scale:
+                                2.5, // Ajusta este valor para cambiar el tamaño del Checkbox
+                            child: Checkbox(
+                              value: selectedOrders.contains(order),
+                              onChanged: (bool? value) {
                                 setState(() {
                                   if (value ?? false) {
                                     selectedOrders.add(order);
@@ -452,37 +595,48 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
                                   }
                                   getTotalCostOfSelectedOrders();
                                 });
-                              }
-                            : null,
-                        activeColor: Colors.green,
-                        checkColor: Colors.blue,
-                      ),
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.print, size: 30),
-                      onPressed: () {
-                        // Imprimir el ticket de la orden seleccionada
-                        _printOrder(order);
-                      },
-                    ),
-                  ],
-                );
+                              },
+                              activeColor: Color.fromARGB(255, 255, 255, 255),
+                              checkColor: const Color.fromARGB(255, 0, 0, 0),
+                            ),
+                          ),
+                          SizedBox(width: 15), // Added a SizedBox for spacing
+                          IconButton(
+                            icon: Icon(Icons.print, size: 40),
+                            onPressed: () {
+                              _printOrder(order);
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                } else if (state.response is Error) {
+                  final errorMessage = (state.response as Error).message;
+                  return Center(child: Text('Error: $errorMessage'));
+                } else {
+                  return Center(
+                      child: Text(
+                          'No hay pedidos para llevar listos para entrega.'));
+                }
               },
-            );
-          } else if (state.response is Error) {
-            final errorMessage = (state.response as Error).message;
-            return Center(child: Text('Error: $errorMessage'));
-          } else {
-            return Center(
-                child: Text('No hay pedidos para llevar listos para entrega.'));
-          }
-        },
+            ),
+          ),
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          bloc.add(LoadDeliveryOrders());
-        },
-        child: Icon(Icons.refresh),
+      floatingActionButton: SizedBox(
+        width: 80,
+        height: 80,
+        child: FloatingActionButton(
+          onPressed: () {
+            setState(() {
+              selectedOrders.clear();
+            });
+            bloc.add(LoadDeliveryOrders());
+          },
+          child: Icon(Icons.refresh, size: 40),
+          backgroundColor: Colors.blue,
+        ),
       ),
     );
   }

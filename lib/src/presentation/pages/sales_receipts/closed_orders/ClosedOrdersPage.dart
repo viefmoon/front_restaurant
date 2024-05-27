@@ -153,6 +153,39 @@ class _ClosedOrdersPageState extends State<ClosedOrdersPage> {
                       ),
                     );
                   },
+                  trailing: order.status == OrderStatus.finished
+                      ? ElevatedButton(
+                          onPressed: () async {
+                            bool? confirmed = await showDialog<bool>(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: Text('Confirmar recuperación'),
+                                  content: Text(
+                                      '¿Estás seguro de que deseas recuperar esta orden?'),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(false),
+                                      child: Text('Cancelar'),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(true),
+                                      child: Text('Recuperar'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+
+                            if (confirmed ?? false) {
+                              bloc.add(RecoverOrder(order.id!));
+                            }
+                          },
+                          child: Text('Recuperar'),
+                        )
+                      : null,
                 );
               },
             );

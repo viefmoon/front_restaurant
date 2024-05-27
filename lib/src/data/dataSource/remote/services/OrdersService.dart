@@ -300,6 +300,25 @@ class OrdersService {
     }
   }
 
+  Future<Resource<Order>> recoverOrder(int orderId) async {
+    try {
+      String apiEcommerce = await ApiConfig.getApiEcommerce();
+      Uri url = Uri.http(apiEcommerce, '/orders/$orderId/recover');
+      final response = await http.patch(
+        url,
+        headers: {"Content-Type": "application/json"},
+      );
+      if (response.statusCode == 200) {
+        Order completedOrder = Order.fromJson(json.decode(response.body));
+        return Success(completedOrder);
+      } else {
+        return Error("Error al recuperar la orden: ${response.body}");
+      }
+    } catch (e) {
+      return Error(e.toString());
+    }
+  }
+
   Future<Resource<List<Order>>> completeMultipleOrders(
       List<int> orderIds) async {
     try {

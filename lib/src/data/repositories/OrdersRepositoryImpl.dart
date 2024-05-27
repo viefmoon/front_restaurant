@@ -80,6 +80,11 @@ class OrdersRepositoryImpl implements OrdersRepository {
   }
 
   @override
+  Future<Resource<Order>> recoverOrder(int orderId) {
+    return ordersService.recoverOrder(orderId);
+  }
+
+  @override
   Future<Resource<List<Order>>> completeMultipleOrders(List<int> orderIds) {
     return ordersService.completeMultipleOrders(orderIds);
   }

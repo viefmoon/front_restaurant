@@ -20,6 +20,7 @@ abstract class OrdersRepository {
       {List<String>? subcategories, int? ordersLimit});
   Future<Resource<Order>> registerPayment(int orderId, double amount);
   Future<Resource<Order>> completeOrder(int orderId);
+  Future<Resource<Order>> recoverOrder(int orderId);
   Future<Resource<List<Order>>> completeMultipleOrders(List<int> orderIds);
   Future<Resource<List<Order>>> revertMultipleOrdersToPrepared(
       List<int> orderIds);

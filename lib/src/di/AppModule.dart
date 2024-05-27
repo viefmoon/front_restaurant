@@ -36,6 +36,7 @@ import 'package:restaurante/src/domain/useCases/orders/GetPrintedOrdersUseCase.d
 import 'package:restaurante/src/domain/useCases/orders/GetSalesReportUseCase.dart';
 import 'package:restaurante/src/domain/useCases/orders/MarkOrdersAsInDeliveryUseCase.dart';
 import 'package:restaurante/src/domain/useCases/orders/OrdersUseCases.dart';
+import 'package:restaurante/src/domain/useCases/orders/RecoverOrderUseCase.dart';
 import 'package:restaurante/src/domain/useCases/orders/RegisterPaymentUseCase.dart';
 import 'package:restaurante/src/domain/useCases/orders/RegisterTicketPrintUseCase.dart';
 import 'package:restaurante/src/domain/useCases/orders/ResetDatabaseUseCase.dart';
@@ -148,6 +149,7 @@ abstract class AppModule {
             FindOrderItemsWithCountsUseCase(ordersRepository),
         registerPayment: RegisterPaymentUseCase(ordersRepository),
         completeOrder: CompleteOrderUseCase(ordersRepository),
+        recoverOrder: RecoverOrderUseCase(ordersRepository),
         completeMultipleOrders: CompleteMultipleOrdersUseCase(ordersRepository),
         cancelOrder: CancelOrderUseCase(ordersRepository),
         getDeliveryOrders: GetDeliveryOrdersUseCase(ordersRepository),

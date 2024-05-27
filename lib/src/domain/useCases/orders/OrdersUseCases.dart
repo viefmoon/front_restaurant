@@ -10,6 +10,7 @@ import 'package:restaurante/src/domain/useCases/orders/GetOrderForUpdateUseCase.
 import 'package:restaurante/src/domain/useCases/orders/GetPrintedOrdersUseCase.dart';
 import 'package:restaurante/src/domain/useCases/orders/GetSalesReportUseCase.dart';
 import 'package:restaurante/src/domain/useCases/orders/MarkOrdersAsInDeliveryUseCase.dart';
+import 'package:restaurante/src/domain/useCases/orders/RecoverOrderUseCase.dart';
 import 'package:restaurante/src/domain/useCases/orders/RegisterPaymentUseCase.dart';
 import 'package:restaurante/src/domain/useCases/orders/RegisterTicketPrintUseCase.dart';
 import 'package:restaurante/src/domain/useCases/orders/ResetDatabaseUseCase.dart';
@@ -32,6 +33,7 @@ class OrdersUseCases {
   FindOrderItemsWithCountsUseCase findOrderItemsWithCounts;
   RegisterPaymentUseCase registerPayment;
   CompleteOrderUseCase completeOrder;
+  RecoverOrderUseCase recoverOrder;
   CancelOrderUseCase cancelOrder;
   GetDeliveryOrdersUseCase getDeliveryOrders;
   MarkOrdersAsInDeliveryUseCase markOrdersAsInDelivery;
@@ -56,6 +58,7 @@ class OrdersUseCases {
     required this.findOrderItemsWithCounts,
     required this.registerPayment,
     required this.completeOrder,
+    required this.recoverOrder,
     required this.cancelOrder,
     required this.getDeliveryOrders,
     required this.markOrdersAsInDelivery,

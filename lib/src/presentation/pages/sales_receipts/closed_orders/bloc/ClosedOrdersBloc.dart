@@ -12,6 +12,7 @@ class ClosedOrdersBloc extends Bloc<ClosedOrdersEvent, ClosedOrdersState> {
     required this.ordersUseCases,
   }) : super(ClosedOrdersState()) {
     on<LoadClosedOrders>(_onLoadClosedOrders);
+    on<RecoverOrder>(_onRecoverOrder);
   }
 
   Future<void> _onLoadClosedOrders(
@@ -23,6 +24,25 @@ class ClosedOrdersBloc extends Bloc<ClosedOrdersEvent, ClosedOrdersState> {
       emit(state.copyWith(orders: orders, response: Initial()));
     } else {
       emit(state.copyWith(orders: [], response: Initial()));
+    }
+  }
+
+  Future<void> _onRecoverOrder(
+      RecoverOrder event, Emitter<ClosedOrdersState> emit) async {
+    emit(state.copyWith(response: Loading()));
+    Resource<Order> response =
+        await ordersUseCases.recoverOrder.run(event.orderId);
+    if (response is Success<Order>) {
+      Order recoveredOrder = response.data;
+      // Actualizar la lista de órdenes cerradas en el estado
+      List<Order> updatedOrders = state.orders!.map((order) {
+        return order.id == recoveredOrder.id ? recoveredOrder : order;
+      }).toList();
+      emit(state.copyWith(orders: updatedOrders, response: Initial()));
+      // Cargar la lista de órdenes cerradas después de recuperar una orden
+      add(LoadClosedOrders());
+    } else {
+      emit(state.copyWith(response: Error((response as Error).message)));
     }
   }
 }
