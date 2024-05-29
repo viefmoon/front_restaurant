@@ -181,9 +181,8 @@ class _OpenOrdersPageState extends State<OpenOrdersPage> {
                           '#${order.id ?? ""}'; // Asegura que el ID siempre esté presente
 
                       // Convierte la fecha de creación a la zona horaria local y la formatea
-                      String formattedDate = DateFormat('yyyy-MM-dd HH:mm')
-                          .format(
-                              order.creationDate?.toLocal() ?? DateTime.now());
+                      String formattedDate = DateFormat('HH:mm').format(
+                          order.creationDate?.toLocal() ?? DateTime.now());
                       String subtitle =
                           formattedDate; // Usa la fecha formateada como subtítulo
 
@@ -191,7 +190,7 @@ class _OpenOrdersPageState extends State<OpenOrdersPage> {
                       String scheduledDeliveryTimeText = '';
                       if (order.scheduledDeliveryTime != null) {
                         String formattedScheduledDeliveryTime =
-                            DateFormat('yyyy-MM-dd HH:mm')
+                            DateFormat('HH:mm')
                                 .format(order.scheduledDeliveryTime!.toLocal());
                         scheduledDeliveryTimeText =
                             ' - programada: $formattedScheduledDeliveryTime';

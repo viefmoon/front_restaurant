@@ -1,4 +1,6 @@
 import 'package:restaurante/src/domain/models/Order.dart';
+import 'package:restaurante/src/domain/models/OrderItem.dart';
+import 'package:restaurante/src/domain/models/SelectedModifier.dart';
 import 'package:restaurante/src/domain/models/SelectedPizzaIngredient.dart';
 import 'package:restaurante/src/domain/utils/Resource.dart';
 import 'package:restaurante/src/presentation/pages/sales_receipts/delivery_orders/bloc/DeliveryOrdersBloc.dart';
@@ -27,8 +29,11 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
   }
 
   double getTotalCostOfSelectedOrders() {
-    return selectedOrders.fold(
-        0.0, (sum, order) => sum + (order.totalCost ?? 0.0));
+    return selectedOrders.fold(0.0, (sum, order) {
+      double remainingAmount =
+          (order.totalCost ?? 0.0) - (order.amountPaid ?? 0.0);
+      return sum + (remainingAmount > 0 ? remainingAmount : 0.0);
+    });
   }
 
   List<Order> _filterOrders(List<Order> orders) {
@@ -386,11 +391,11 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
               },
             ),
           Padding(
-            padding: const EdgeInsets.only(right: 20.0),
+            padding: const EdgeInsets.only(right: 5.0),
             child: Center(
               child: Text(
                 'Total: \$${totalCost.toStringAsFixed(2)}',
-                style: TextStyle(fontSize: 24),
+                style: TextStyle(fontSize: 26),
               ),
             ),
           ),
@@ -399,7 +404,7 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
       body: Column(
         children: [
           CheckboxListTile(
-            title: Text('Filtrar a Domicilio'),
+            title: Text('Filtrar a Domicilio', style: TextStyle(fontSize: 24)),
             value: filterDelivery,
             onChanged: (bool? value) {
               setState(() {
@@ -409,7 +414,8 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
             },
           ),
           CheckboxListTile(
-            title: Text('Filtrar Pasan/Esperan'),
+            title:
+                Text('Filtrar Pasan/Esperan', style: TextStyle(fontSize: 24)),
             value: filterPickUpWait,
             onChanged: (bool? value) {
               setState(() {
@@ -501,6 +507,11 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
                             '#${order.id} - ${order.deliveryAddress}, Tel: ${order.phoneNumber}';
                       }
 
+                      bool containsBeverage = order.orderItems?.any((item) =>
+                              item.product?.subcategory?.category?.name ==
+                              'Bebida') ??
+                          false;
+
                       return Row(
                         children: [
                           Expanded(
@@ -512,13 +523,33 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
                                     return AlertDialog(
                                       content: SingleChildScrollView(
                                         child: ListBody(
-                                          children:
-                                              order.orderItems!.map((item) {
+                                          children: _groupOrderItems(
+                                                  order.orderItems!)
+                                              .entries
+                                              .map((entry) {
+                                            final item = entry.key;
+                                            final count = entry.value;
+                                            String itemName =
+                                                item.productVariant?.name ??
+                                                    item.product?.name ??
+                                                    '';
+                                            if (item.selectedModifiers !=
+                                                    null &&
+                                                item.selectedModifiers!
+                                                    .isNotEmpty) {
+                                              String modifiers = item
+                                                  .selectedModifiers!
+                                                  .map((m) => m.modifier?.name)
+                                                  .join(', ');
+                                              itemName += ' ($modifiers)';
+                                            }
+                                            String displayText = count > 1
+                                                ? '$count - $itemName'
+                                                : itemName;
                                             return Text(
-                                                '${item.product?.name ?? ''}',
-                                                style: TextStyle(
-                                                    fontSize:
-                                                        22)); // Increased font size
+                                              displayText,
+                                              style: TextStyle(fontSize: 22),
+                                            );
                                           }).toList(),
                                         ),
                                       ),
@@ -538,7 +569,8 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
                                 );
                               },
                               child: Padding(
-                                padding: const EdgeInsets.all(16.0),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 15.0, vertical: 8.0),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -549,16 +581,15 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
                                         fontSize: 22,
                                       ),
                                     ),
-                                    SizedBox(height: 8),
                                     RichText(
                                       text: TextSpan(
                                         children: [
                                           TextSpan(
                                             text:
-                                                'Total: \$${order.totalCost?.toStringAsFixed(2) ?? ''} - Creacion: ${order.creationDate != null ? '${order.creationDate!.toLocal().hour}:${order.creationDate!.toLocal().minute}' : ''} - Estado: $statusText',
+                                                'Total: \$${order.totalCost?.toStringAsFixed(2) ?? ''} - ${order.creationDate != null ? '${order.creationDate!.toLocal().hour}:${order.creationDate!.toLocal().minute}' : ''} -  $statusText',
                                             style: TextStyle(
                                               color: textColor,
-                                              fontSize: 22,
+                                              fontSize: 17,
                                             ),
                                           ),
                                           TextSpan(
@@ -570,9 +601,16 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
                                                 : ' (NO PAGADO)',
                                             style: TextStyle(
                                               color: paymentStatusColor,
-                                              fontSize: 22,
+                                              fontSize: 16,
                                             ),
                                           ),
+                                          if (containsBeverage)
+                                            TextSpan(
+                                              text: ' BEBIDA',
+                                              style: TextStyle(
+                                                fontSize: 17,
+                                              ),
+                                            )
                                         ],
                                       ),
                                     ),
@@ -583,7 +621,7 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
                           ),
                           Transform.scale(
                             scale:
-                                2.5, // Ajusta este valor para cambiar el tamaño del Checkbox
+                                1.8, // Ajusta este valor para cambiar el tamaño del Checkbox
                             child: Checkbox(
                               value: selectedOrders.contains(order),
                               onChanged: (bool? value) {
@@ -600,7 +638,7 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
                               checkColor: const Color.fromARGB(255, 0, 0, 0),
                             ),
                           ),
-                          SizedBox(width: 15), // Added a SizedBox for spacing
+                          SizedBox(width: 20), // Added a SizedBox for spacing
                           IconButton(
                             icon: Icon(Icons.print, size: 40),
                             onPressed: () {
@@ -624,20 +662,61 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
           ),
         ],
       ),
-      floatingActionButton: SizedBox(
-        width: 80,
-        height: 80,
-        child: FloatingActionButton(
-          onPressed: () {
-            setState(() {
-              selectedOrders.clear();
-            });
-            bloc.add(LoadDeliveryOrders());
-          },
-          child: Icon(Icons.refresh, size: 40),
-          backgroundColor: Colors.blue,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 10.0, right: 10.0),
+        child: SizedBox(
+          width: 65,
+          height: 65,
+          child: FloatingActionButton(
+            onPressed: () {
+              setState(() {
+                selectedOrders.clear();
+              });
+
+              bloc.add(LoadDeliveryOrders());
+            },
+            child: Icon(Icons.refresh, size: 40),
+            backgroundColor: Colors.blue,
+          ),
         ),
       ),
     );
+  }
+
+  Map<OrderItem, int> _groupOrderItems(List<OrderItem> items) {
+    final Map<OrderItem, int> groupedItems = {};
+    for (var item in items) {
+      bool found = false;
+      for (var key in groupedItems.keys) {
+        if (_areItemsEqual(key, item)) {
+          groupedItems[key] = groupedItems[key]! + 1;
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        groupedItems[item] = 1;
+      }
+    }
+    return groupedItems;
+  }
+
+  bool _areItemsEqual(OrderItem a, OrderItem b) {
+    return a.productVariant?.id == b.productVariant?.id &&
+        a.product?.id == b.product?.id &&
+        _areModifiersEqual(a.selectedModifiers, b.selectedModifiers);
+  }
+
+  bool _areModifiersEqual(
+      List<SelectedModifier>? a, List<SelectedModifier>? b) {
+    if (a == null && b == null) return true;
+    if (a == null || b == null) return false;
+    if (a.length != b.length) return false;
+    for (var modifier in a) {
+      if (!b.any((m) => m.modifier?.id == modifier.modifier?.id)) {
+        return false;
+      }
+    }
+    return true;
   }
 }
