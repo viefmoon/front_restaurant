@@ -663,16 +663,14 @@ class _OrderUpdatePageState extends State<OrderUpdatePage> {
                       .join(', ');
 
                   String ingredientsText = '';
-                  if (ingredientsLeft.isNotEmpty) {
-                    ingredientsText += 'Mitad 1: $ingredientsLeft';
-                  }
-                  if (ingredientsRight.isNotEmpty) {
-                    if (ingredientsText.isNotEmpty) ingredientsText += ' | ';
-                    ingredientsText += 'Mitad 2: $ingredientsRight';
+                  if (ingredientsLeft.isNotEmpty ||
+                      ingredientsRight.isNotEmpty) {
+                    ingredientsText =
+                        '$ingredientsLeft / $ingredientsRight'.trim();
                   }
                   if (ingredientsNone.isNotEmpty) {
                     if (ingredientsText.isNotEmpty) ingredientsText += ' | ';
-                    ingredientsText += 'Completa: $ingredientsNone';
+                    ingredientsText += '$ingredientsNone';
                   }
 
                   details.add(Text(

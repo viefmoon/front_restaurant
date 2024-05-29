@@ -174,19 +174,17 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
             .where((i) => i.half == PizzaHalf.none)
             .map((i) => i.pizzaIngredient?.name)
             .join(', ');
-
         if (ingredientsLeft.isNotEmpty) {
-          ingredientsText += 'Mitad 1: $ingredientsLeft';
+          ingredientsText += ingredientsLeft;
         }
         if (ingredientsRight.isNotEmpty) {
-          if (ingredientsText.isNotEmpty) ingredientsText += ' | ';
-          ingredientsText += 'Mitad 2: $ingredientsRight';
+          if (ingredientsText.isNotEmpty) ingredientsText += ' / ';
+          ingredientsText += ingredientsRight;
         }
         if (ingredientsNone.isNotEmpty) {
           if (ingredientsText.isNotEmpty) ingredientsText += ' | ';
-          ingredientsText += 'Completa: $ingredientsNone';
+          ingredientsText += '$ingredientsNone';
         }
-
         content += addPrefixToEachLine(ingredientsText, detailPrefix) + '\n';
       }
     });
