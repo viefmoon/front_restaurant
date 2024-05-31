@@ -1607,7 +1607,7 @@ class _OrderUpdatePageState extends State<OrderUpdatePage> {
           '${state.areas?.firstWhere((area) => area.id == state.selectedAreaId)?.name ?? ''}:' +
           cmdFontSizeNormal;
       content += cmdFontSizeMedium +
-          '${state.tables?.firstWhere((table) => table.id == state.selectedTableId)?.number ?? ''}\n' +
+          '${state.tables?.firstWhere((table) => table.id == state.selectedTableId)?.number ?? state.temporaryIdentifier}\n' +
           cmdFontSizeNormal;
     } else if (state.selectedOrderType == OrderType.delivery) {
       // Alinear los detalles de la orden a la izquierda

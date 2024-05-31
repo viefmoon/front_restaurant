@@ -5,7 +5,7 @@ class ApiConfig {
 
   static Future<String> getApiEcommerce() async {
     final prefs = await SharedPreferences.getInstance();
-    String serverIP = prefs.getString('serverIP') ?? "192.168.100.32";
+    String serverIP = prefs.getString('serverIP') ?? "192.168.0.50";
     // Concatena el puerto aquí
     _api = "$serverIP:3000";
     return _api;
