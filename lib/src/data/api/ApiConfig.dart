@@ -1,7 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiConfig {
-  static String _api = "192.168.100.32:3000"; // Valor por defecto
+  static String _api = "192.168.0.50:3000"; // Valor por defecto
 
   static Future<String> getApiEcommerce() async {
     final prefs = await SharedPreferences.getInstance();

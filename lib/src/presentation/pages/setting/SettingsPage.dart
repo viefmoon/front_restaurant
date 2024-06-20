@@ -38,7 +38,7 @@ class _SettingsScreenState extends State<SettingsPage> {
 
   _loadServerIP() async {
     final prefs = await SharedPreferences.getInstance();
-    String serverIP = prefs.getString('serverIP') ?? '192.168.100.32';
+    String serverIP = prefs.getString('serverIP') ?? '192.168.0.50';
     _ipController.text = serverIP;
   }
 
