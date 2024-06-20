@@ -1,3 +1,6 @@
+import 'dart:typed_data';
+import 'package:esc_pos_utils_plus/esc_pos_utils_plus.dart';
+import 'package:intl/intl.dart';
 import 'package:restaurante/src/domain/models/Order.dart';
 import 'package:restaurante/src/domain/models/OrderItem.dart';
 import 'package:restaurante/src/domain/models/SelectedModifier.dart';
@@ -49,131 +52,157 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
     return orders;
   }
 
-  String _generateTicketContent(Order order) {
-    String content = '';
-    String cmdFontSizeLarge =
-        "\x1d\x21\x12"; // Ajusta este valor según tu impresora
-    String cmdFontSizeMedium = "\x1d\x21\x01";
-    String cmdFontSizeNormal =
-        "\x1d\x21\x00"; // Comando para restablecer el tamaño de la fuente a normal
-
-    // Comandos para activar/desactivar negrita
-    String cmdBoldOn = "\x1b\x45\x01";
-    String cmdBoldOff = "\x1b\x45\x00";
-
-    // Comando para centrar el texto
-    String cmdAlignCenter = "\x1b\x61\x01";
-
-    // Comando para alinear el texto a la izquierda
-    String cmdAlignLeft = "\x1b\x61\x00";
-
-    // Añadir "Orden" con el tamaño de fuente grande y en negrita
-    content += cmdBoldOn +
-        cmdFontSizeLarge +
-        'Orden #${order.id}\n\n' +
-        cmdBoldOff +
-        cmdFontSizeMedium;
-
-    // Imprimir el tipo de orden
-    switch (order.orderType) {
-      case OrderType.delivery:
-        content += cmdAlignCenter + 'Entrega a domicilio\n\n';
-        break;
-      case OrderType.dineIn:
-        content += cmdAlignCenter + 'Comer Dentro\n\n';
-        break;
-      case OrderType.pickUpWait:
-        content += cmdAlignCenter + 'Llevar/Esperar\n\n';
-        break;
-      default:
-        content += cmdAlignCenter + 'Tipo de orden desconocido\n\n';
-        break;
+  String _removeAccents(String input) {
+    const accents = 'áéíóúÁÉÍÓÚñÑ';
+    const withoutAccents = 'aeiouAEIOUnN';
+    String output = input;
+    for (int i = 0; i < accents.length; i++) {
+      output = output.replaceAll(accents[i], withoutAccents[i]);
     }
+    return output;
+  }
 
-    // Alinear los detalles de la orden a la izquierda
-    content += cmdAlignLeft;
+  Future<List<int>> _generateTicketContent80(Order order) async {
+    final profile = await CapabilityProfile.load(name: 'default');
+    final generator = Generator(PaperSize.mm80, profile);
+    List<int> bytes = [];
+    bytes += generator.setGlobalCodeTable('CP1252');
+    // Añadir "Orden" con el tamaño de fuente grande y en negrita
+    bytes += generator.text(
+      _removeAccents('Orden #${order.id}'),
+      styles: PosStyles(
+        align: PosAlign.center,
+        height: PosTextSize.size4,
+        width: PosTextSize.size4,
+        bold: true,
+        fontType: PosFontType.fontA,
+      ),
+    );
+
+    // Añadir un salto de línea
+    bytes += generator.feed(1);
 
     // Imprimir detalles de la orden
     switch (order.orderType) {
       case OrderType.delivery:
-        content += 'Telefono: ${order.phoneNumber}\n';
-        content += 'Direccion: ${order.deliveryAddress}\n' + cmdFontSizeNormal;
+        bytes += generator.text(
+            _removeAccents('Telefono: ${order.phoneNumber}'),
+            styles: PosStyles(
+                height: PosTextSize.size3,
+                width: PosTextSize.size2,
+                bold: true));
+        bytes += generator.text(
+            _removeAccents('Direccion: ${order.deliveryAddress}'),
+            styles: PosStyles(
+                height: PosTextSize.size3,
+                width: PosTextSize.size2,
+                bold: true));
         break;
       case OrderType.dineIn:
-        content += 'Area: ${order.area?.name}\n';
-        content += 'Mesa: ${order.table?.number}\n' + cmdFontSizeNormal;
+        bytes += generator.text(_removeAccents('Area: ${order.area?.name}'),
+            styles: PosStyles(
+                height: PosTextSize.size3,
+                width: PosTextSize.size2,
+                bold: true));
+        bytes += generator.text(_removeAccents('Mesa: ${order.table?.number}'),
+            styles: PosStyles(
+                height: PosTextSize.size3,
+                width: PosTextSize.size2,
+                bold: true));
         break;
       case OrderType.pickUpWait:
-        content += 'Nombre del Cliente: ${order.customerName}\n';
-        content += 'Telefono: ${order.phoneNumber}\n' + cmdFontSizeNormal;
+        bytes += generator.text(
+            _removeAccents('Nombre del Cliente: ${order.customerName}'),
+            styles: PosStyles(
+                height: PosTextSize.size3,
+                width: PosTextSize.size2,
+                bold: true));
+        bytes += generator.text(
+            _removeAccents('Telefono: ${order.phoneNumber}'),
+            styles: PosStyles(
+                height: PosTextSize.size3,
+                width: PosTextSize.size2,
+                bold: true));
         break;
       default:
         break;
     }
 
-    // Añadir la fecha de impresión del ticket formateada hasta el minuto
-    content += 'Fecha: ${DateTime.now().toString().substring(0, 16)}\n';
-    content +=
-        '--------------------------------\n'; // Línea de separación con guiones
+    // Añadir la fecha de creación del ticket formateada hasta el minuto en hora local
+    String formattedCreationDate =
+        DateFormat('dd/MM/yyyy HH:mm').format(order.creationDate!.toLocal());
+    bytes += generator.text('Fecha: $formattedCreationDate',
+        styles: PosStyles(
+          align: PosAlign.left,
+          height: PosTextSize.size1,
+          width: PosTextSize.size1,
+        ));
+
+    bytes += generator.hr();
 
     // Imprimir los detalles de los productos de la orden
     order.orderItems?.forEach((item) {
-      final int lineWidth = 32; // Ajusta según el ancho de tu impresora
       String productName =
-          item.productVariant?.name ?? item.product?.name ?? '';
-      String productPrice = '\$${item.price?.toStringAsFixed(2) ?? ''}';
+          _removeAccents(item.productVariant?.name ?? item.product?.name ?? '');
+      String productPrice = '\$${item.price?.toInt() ?? ''}';
 
-      // Calcula el espacio máximo disponible para el nombre del producto o variante
-      int maxProductNameLength = lineWidth - productPrice.length - 1;
-
-      // Trunca el nombre del producto o variante si es necesario
-      if (productName.length > maxProductNameLength) {
-        productName =
-            productName.substring(0, maxProductNameLength - 3) + '...';
-      }
-
-      // Calcula el espacio restante después de colocar el nombre truncado y el precio
-      int spaceNeeded = lineWidth - productName.length - productPrice.length;
-      String spaces = ' ' * (spaceNeeded > 0 ? spaceNeeded : 0);
-
-      content += productName + spaces + productPrice + '\n';
-
-      // Función para agregar espacios al inicio de cada línea de un detalle
-      String addPrefixToEachLine(String text, String prefix) {
-        return text.split('\n').map((line) => prefix + line).join('\n');
-      }
-
-      // Define un prefijo de espacios para los detalles adicionales
-      String detailPrefix = '  '; // 4 espacios de indentación
+      bytes += generator.row([
+        PosColumn(
+          text: productName,
+          width: 9,
+          styles: PosStyles(
+            align: PosAlign.left,
+            height: PosTextSize.size3,
+            width: PosTextSize.size2,
+          ),
+        ),
+        PosColumn(
+          text: productPrice,
+          width: 3,
+          styles: PosStyles(
+            align: PosAlign.right,
+            height: PosTextSize.size2,
+            width: PosTextSize.size2,
+          ),
+        ),
+      ]);
 
       // Agrega detalles adicionales como modificadores, ingredientes, etc.
       if (item.selectedModifiers != null &&
           item.selectedModifiers!.isNotEmpty) {
-        String modifiersText =
-            'Modificadores: ${item.selectedModifiers!.map((m) => m.modifier?.name).join(', ')}';
-        content += addPrefixToEachLine(modifiersText, detailPrefix) + '\n';
+        String modifiersText = _removeAccents(
+            '${item.selectedModifiers!.map((m) => m.modifier?.name).join(', ')}');
+        bytes += generator.text(modifiersText,
+            styles: PosStyles(
+              align: PosAlign.left,
+              height: PosTextSize.size2,
+            ));
       }
       if (item.selectedPizzaFlavors != null &&
           item.selectedPizzaFlavors!.isNotEmpty) {
-        String flavorsText =
-            'Sabor: ${item.selectedPizzaFlavors!.map((f) => f.pizzaFlavor?.name).join('/')}';
-        content += addPrefixToEachLine(flavorsText, detailPrefix) + '\n';
+        String flavorsText = _removeAccents(
+            '${item.selectedPizzaFlavors!.map((f) => f.pizzaFlavor?.name).join('/')}');
+        bytes += generator.text(flavorsText,
+            styles: PosStyles(
+              align: PosAlign.left,
+              height: PosTextSize.size2, // Aumenta el tamaño del texto
+            ));
       }
       if (item.selectedPizzaIngredients != null &&
           item.selectedPizzaIngredients!.isNotEmpty) {
         String ingredientsText = '';
-        final ingredientsLeft = item.selectedPizzaIngredients!
+        final ingredientsLeft = _removeAccents(item.selectedPizzaIngredients!
             .where((i) => i.half == PizzaHalf.left)
             .map((i) => i.pizzaIngredient?.name)
-            .join(', ');
-        final ingredientsRight = item.selectedPizzaIngredients!
+            .join(', '));
+        final ingredientsRight = _removeAccents(item.selectedPizzaIngredients!
             .where((i) => i.half == PizzaHalf.right)
             .map((i) => i.pizzaIngredient?.name)
-            .join(', ');
-        final ingredientsNone = item.selectedPizzaIngredients!
+            .join(', '));
+        final ingredientsNone = _removeAccents(item.selectedPizzaIngredients!
             .where((i) => i.half == PizzaHalf.none)
             .map((i) => i.pizzaIngredient?.name)
-            .join(', ');
+            .join(', '));
         if (ingredientsLeft.isNotEmpty) {
           ingredientsText += ingredientsLeft;
         }
@@ -185,60 +214,288 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
           if (ingredientsText.isNotEmpty) ingredientsText += ' | ';
           ingredientsText += '$ingredientsNone';
         }
-        content += addPrefixToEachLine(ingredientsText, detailPrefix) + '\n';
+        bytes += generator.text(ingredientsText,
+            styles: PosStyles(
+              align: PosAlign.left,
+              height: PosTextSize.size2, // Aumenta el tamaño del texto
+            ));
       }
     });
 
     // Procesamiento de los ajustes de la orden
     order.orderAdjustments?.forEach((adjustment) {
-      final int lineWidth = 32;
-      String adjustmentName = adjustment.name ?? '';
+      String adjustmentName = _removeAccents(adjustment.name ?? '');
       String adjustmentAmount = adjustment.amount! < 0
-          ? '-\$${(-adjustment.amount!).toStringAsFixed(2)}'
-          : '\$${adjustment.amount?.toStringAsFixed(2) ?? ''}';
+          ? '-\$${(-adjustment.amount!).toInt()}'
+          : '\$${adjustment.amount?.toInt() ?? ''}';
 
-      int maxAdjustmentNameLength = lineWidth - adjustmentAmount.length - 1;
-      if (adjustmentName.length > maxAdjustmentNameLength) {
-        adjustmentName =
-            adjustmentName.substring(0, maxAdjustmentNameLength - 3) + '...';
-      }
-
-      int spaceNeeded =
-          lineWidth - adjustmentName.length - adjustmentAmount.length;
-      String spaces = ' ' * (spaceNeeded > 0 ? spaceNeeded : 0);
-
-      content += adjustmentName + spaces + adjustmentAmount + '\n';
+      bytes += generator.row([
+        PosColumn(
+          text: adjustmentName,
+          width: 9,
+          styles: PosStyles(align: PosAlign.left),
+        ),
+        PosColumn(
+          text: adjustmentAmount,
+          width: 3,
+          styles: PosStyles(align: PosAlign.right),
+        ),
+      ]);
     });
 
-    content +=
-        '--------------------------------\n'; // Línea de separación con guiones
-    content +=
-        cmdFontSizeLarge + 'Total: \$${order.totalCost?.toStringAsFixed(2)}\n';
+    bytes += generator.hr(); // Línea de separación
+    bytes += generator.text(
+      'Total: \$${order.totalCost?.toInt()}',
+      styles: PosStyles(
+        align: PosAlign.center,
+        height: PosTextSize.size3,
+        width: PosTextSize.size2,
+      ),
+    );
 
     // Verifica si hay un pago registrado
     if (order.amountPaid != null && order.amountPaid! > 0) {
-      content += 'Pagado: \$${order.amountPaid?.toStringAsFixed(2)}\n';
-      content +=
-          'Resto: \$${(order.totalCost! - order.amountPaid!).toStringAsFixed(2)}\n' +
-              cmdFontSizeNormal;
+      bytes +=
+          generator.text('Pagado: \$${order.amountPaid?.toStringAsFixed(2)}');
+      bytes += generator.text(
+          'Resto: \$${(order.totalCost! - order.amountPaid!).toStringAsFixed(2)}');
     }
 
     // Añade un mensaje de gracias después del total
-    content += cmdAlignCenter +
-        cmdFontSizeMedium +
-        '\n" Gracias por su preferencia "\n';
+    bytes += generator.text(
+      _removeAccents('\n" Gracias por su preferencia "\n'),
+      styles: PosStyles(align: PosAlign.center),
+    );
 
-    content += '\n\n\n';
-    return content;
+    bytes += generator.feed(1); // Avanza el papel tres líneas
+
+    // Añade el corte de papel al final
+    bytes += generator.cut();
+
+    return bytes;
+  }
+
+  Future<List<int>> _generateTicketContent58(Order order) async {
+    final profile = await CapabilityProfile.load(name: 'default');
+    final generator = Generator(PaperSize.mm58, profile);
+    List<int> bytes = [];
+    bytes += generator.setGlobalCodeTable('CP1252');
+    // Añadir "Orden" con el tamaño de fuente grande y en negrita
+    bytes += generator.text(
+      _removeAccents('Orden #${order.id}'),
+      styles: PosStyles(
+        align: PosAlign.center,
+        height: PosTextSize.size3,
+        width: PosTextSize.size2,
+        bold: true,
+        fontType: PosFontType.fontA,
+      ),
+    );
+
+    // Añadir un salto de línea
+    bytes += generator.feed(1);
+
+    // Imprimir detalles de la orden
+    switch (order.orderType) {
+      case OrderType.delivery:
+        bytes += generator.text(
+            _removeAccents('Telefono: ${order.phoneNumber}'),
+            styles: PosStyles(
+                height: PosTextSize.size2,
+                width: PosTextSize.size1,
+                bold: true));
+        bytes += generator.text(
+            _removeAccents('Direccion: ${order.deliveryAddress}'),
+            styles: PosStyles(
+                height: PosTextSize.size2,
+                width: PosTextSize.size1,
+                bold: true));
+        break;
+      case OrderType.dineIn:
+        bytes += generator.text(_removeAccents('Area: ${order.area?.name}'),
+            styles: PosStyles(
+                height: PosTextSize.size2,
+                width: PosTextSize.size1,
+                bold: true));
+        bytes += generator.text(_removeAccents('Mesa: ${order.table?.number}'),
+            styles: PosStyles(
+                height: PosTextSize.size2,
+                width: PosTextSize.size1,
+                bold: true));
+        break;
+      case OrderType.pickUpWait:
+        bytes += generator.text(
+            _removeAccents('Nombre del Cliente: ${order.customerName}'),
+            styles: PosStyles(
+                height: PosTextSize.size2,
+                width: PosTextSize.size1,
+                bold: true));
+        bytes += generator.text(
+            _removeAccents('Telefono: ${order.phoneNumber}'),
+            styles: PosStyles(
+                height: PosTextSize.size2,
+                width: PosTextSize.size1,
+                bold: true));
+        break;
+      default:
+        break;
+    }
+
+    // Añadir la fecha de creación del ticket formateada hasta el minuto
+    String formattedCreationDate =
+        DateFormat('dd/MM/yyyy HH:mm').format(order.creationDate!.toLocal());
+    bytes += generator.text('Fecha: $formattedCreationDate',
+        styles: PosStyles(
+          align: PosAlign.left,
+          height: PosTextSize.size1,
+          width: PosTextSize.size1,
+        ));
+
+    bytes += generator.hr();
+
+    // Imprimir los detalles de los productos de la orden
+    order.orderItems?.forEach((item) {
+      String productName =
+          _removeAccents(item.productVariant?.name ?? item.product?.name ?? '');
+      String productPrice = '\$${item.price?.toInt() ?? ''}';
+
+      bytes += generator.row([
+        PosColumn(
+          text: productName,
+          width: 9,
+          styles: PosStyles(
+            align: PosAlign.left,
+            height: PosTextSize.size2,
+            width: PosTextSize.size1,
+          ),
+        ),
+        PosColumn(
+          text: productPrice,
+          width: 3,
+          styles: PosStyles(
+            align: PosAlign.right,
+            height: PosTextSize.size1,
+            width: PosTextSize.size1,
+          ),
+        ),
+      ]);
+
+      // Agrega detalles adicionales como modificadores, ingredientes, etc.
+      if (item.selectedModifiers != null &&
+          item.selectedModifiers!.isNotEmpty) {
+        String modifiersText = _removeAccents(
+            '${item.selectedModifiers!.map((m) => m.modifier?.name).join(', ')}');
+        bytes += generator.text(modifiersText,
+            styles: PosStyles(
+              align: PosAlign.left,
+              height: PosTextSize.size1,
+            ));
+      }
+      if (item.selectedPizzaFlavors != null &&
+          item.selectedPizzaFlavors!.isNotEmpty) {
+        String flavorsText = _removeAccents(
+            '${item.selectedPizzaFlavors!.map((f) => f.pizzaFlavor?.name).join('/')}');
+        bytes += generator.text(flavorsText,
+            styles: PosStyles(
+              align: PosAlign.left,
+              height: PosTextSize.size1, // Aumenta el tamaño del texto
+            ));
+      }
+      if (item.selectedPizzaIngredients != null &&
+          item.selectedPizzaIngredients!.isNotEmpty) {
+        String ingredientsText = '';
+        final ingredientsLeft = _removeAccents(item.selectedPizzaIngredients!
+            .where((i) => i.half == PizzaHalf.left)
+            .map((i) => i.pizzaIngredient?.name)
+            .join(', '));
+        final ingredientsRight = _removeAccents(item.selectedPizzaIngredients!
+            .where((i) => i.half == PizzaHalf.right)
+            .map((i) => i.pizzaIngredient?.name)
+            .join(', '));
+        final ingredientsNone = _removeAccents(item.selectedPizzaIngredients!
+            .where((i) => i.half == PizzaHalf.none)
+            .map((i) => i.pizzaIngredient?.name)
+            .join(', '));
+        if (ingredientsLeft.isNotEmpty) {
+          ingredientsText += ingredientsLeft;
+        }
+        if (ingredientsRight.isNotEmpty) {
+          if (ingredientsText.isNotEmpty) ingredientsText += ' / ';
+          ingredientsText += ingredientsRight;
+        }
+        if (ingredientsNone.isNotEmpty) {
+          if (ingredientsText.isNotEmpty) ingredientsText += ' | ';
+          ingredientsText += '$ingredientsNone';
+        }
+        bytes += generator.text(ingredientsText,
+            styles: PosStyles(
+              align: PosAlign.left,
+              height: PosTextSize.size1, // Aumenta el tamaño del texto
+            ));
+      }
+    });
+
+    // Procesamiento de los ajustes de la orden
+    order.orderAdjustments?.forEach((adjustment) {
+      String adjustmentName = _removeAccents(adjustment.name ?? '');
+      String adjustmentAmount = adjustment.amount! < 0
+          ? '-\$${(-adjustment.amount!).toInt()}'
+          : '\$${adjustment.amount?.toInt() ?? ''}';
+
+      bytes += generator.row([
+        PosColumn(
+          text: adjustmentName,
+          width: 9,
+          styles: PosStyles(align: PosAlign.left),
+        ),
+        PosColumn(
+          text: adjustmentAmount,
+          width: 3,
+          styles: PosStyles(align: PosAlign.right),
+        ),
+      ]);
+    });
+
+    bytes += generator.hr(); // Línea de separación
+    bytes += generator.text(
+      'Total: \$${order.totalCost?.toInt()}',
+      styles: PosStyles(
+        align: PosAlign.center,
+        height: PosTextSize.size3,
+        width: PosTextSize.size2,
+      ),
+    );
+
+    // Verifica si hay un pago registrado
+    if (order.amountPaid != null && order.amountPaid! > 0) {
+      bytes +=
+          generator.text('Pagado: \$${order.amountPaid?.toStringAsFixed(2)}');
+      bytes += generator.text(
+          'Resto: \$${(order.totalCost! - order.amountPaid!).toStringAsFixed(2)}');
+    }
+
+    // Añade un mensaje de gracias después del total
+    bytes += generator.text(
+      _removeAccents('\n" Gracias por su preferencia "\n'),
+      styles: PosStyles(align: PosAlign.center),
+    );
+
+    bytes += generator.feed(2); // Avanza el papel tres líneas
+
+    return bytes;
   }
 
   Future<void> _selectAndPrintTicket(Order order) async {
     BlueThermalPrinter bluetooth = BlueThermalPrinter.instance;
+    const int maxRetries = 1;
+    const Duration timeoutDuration = Duration(seconds: 3);
 
     // Verificar si ya está conectado y desconectar si es necesario
     bool? isConnected = await bluetooth.isConnected;
     if (isConnected != null && isConnected) {
       await bluetooth.disconnect();
+      await Future.delayed(Duration(
+          seconds: 1)); // Esperar un momento para asegurar la desconexión
     }
 
     // Obtener dispositivos emparejados
@@ -253,61 +510,106 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
       return;
     }
 
-    // Muestra un diálogo para seleccionar la impresora
-    BluetoothDevice? selectedDevice = await showDialog<BluetoothDevice>(
+    // Muestra un diálogo para seleccionar la impresora y el tamaño del papel
+    Map<String, dynamic>? selection = await showDialog<Map<String, dynamic>>(
       context: context,
       builder: (BuildContext context) {
+        String? selectedPaperSize = '80mm'; // Valor por defecto
         return AlertDialog(
-          title: Text('Seleccionar impresora'),
+          title: Text('Seleccionar impresora y papel'),
           content: SingleChildScrollView(
-            child: ListBody(
-              children: devices
-                  .map((device) => RadioListTile<BluetoothDevice>(
-                        title: Text(device.name ?? ''),
-                        value: device,
-                        groupValue:
-                            null, // No hay ninguna impresora seleccionada inicialmente
-                        onChanged: (BluetoothDevice? value) {
-                          Navigator.pop(context, value);
-                        },
-                      ))
-                  .toList(),
+            child: Column(
+              children: [
+                ListBody(
+                  children: devices
+                      .map((device) => RadioListTile<BluetoothDevice>(
+                            title: Text(device.name ?? ''),
+                            value: device,
+                            groupValue: null,
+                            onChanged: (BluetoothDevice? value) {
+                              Navigator.pop(context, {
+                                'device': value,
+                                'paperSize': selectedPaperSize
+                              });
+                            },
+                          ))
+                      .toList(),
+                ),
+                Divider(),
+                ListTile(
+                  title: Text('Tamaño del papel'),
+                  trailing: DropdownButton<String>(
+                    value: selectedPaperSize,
+                    onChanged: (String? newValue) {
+                      selectedPaperSize = newValue!;
+                    },
+                    items: <String>['58mm', '80mm']
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ],
             ),
           ),
         );
       },
     );
 
-    if (selectedDevice != null) {
-      try {
-        // Conectar con la impresora seleccionada
-        await bluetooth.connect(selectedDevice);
+    if (selection != null) {
+      BluetoothDevice? selectedDevice = selection['device'];
+      String selectedPaperSize = selection['paperSize'];
 
-        // Agregar un retraso antes de imprimir
-        await Future.delayed(Duration(milliseconds: 500));
+      for (int attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          // Verificar si ya está conectado y desconectar si es necesario
+          isConnected = await bluetooth.isConnected;
+          if (isConnected != null && isConnected) {
+            await bluetooth.disconnect();
+            await Future.delayed(Duration(
+                seconds: 2)); // Esperar un momento para asegurar la desconexión
+          }
 
-        // Generar el contenido del ticket
-        String ticketContent = _generateTicketContent(order);
+          // Conectar con la impresora seleccionada
+          if (selectedDevice != null) {
+            await bluetooth.connect(selectedDevice).timeout(timeoutDuration);
+          }
 
-        // Imprimir el ticket
-        await bluetooth.printCustom(ticketContent, 0, 1);
+          // Generar el contenido del ticket segn el tamaño del papel seleccionado
+          List<int> ticketContent;
+          if (selectedPaperSize == '58mm') {
+            ticketContent = await _generateTicketContent58(order);
+          } else {
+            ticketContent = await _generateTicketContent80(order);
+          }
 
-        // Desconectar de la impresora
-        await bluetooth.disconnect();
+          // Imprimir el ticket
+          await bluetooth.writeBytes(Uint8List.fromList(ticketContent));
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Ticket impreso correctamente.'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error al imprimir el ticket: $e'),
-            duration: Duration(seconds: 2),
-          ),
-        );
+          // Desconectar de la impresora
+          await bluetooth.disconnect();
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Ticket impreso correctamente.'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+          return; // Salir de la función si la impresión fue exitosa
+        } catch (e) {
+          if (attempt == maxRetries) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Error al imprimir el ticket: $e'),
+                backgroundColor: Colors.red,
+                duration: Duration(seconds: 2),
+              ),
+            );
+          }
+        }
       }
     }
   }
