@@ -74,34 +74,37 @@ class _SalesHomePageState extends State<SalesHomePage> {
                         ],
                       )),
                   ListTile(
-                    title: Text('Ventas', style: TextStyle(fontSize: 22)),
+                    title: Text('Ventas', style: TextStyle(fontSize: 28)),
                     selected: state.pageIndex == 0,
                     onTap: () {
                       _bloc?.add(SalesChangeDrawerPage(pageIndex: 0));
                       Navigator.pop(context);
                     },
                   ),
+                  SizedBox(height: 5),
                   ListTile(
                     title: Text('Tickets impresos',
-                        style: TextStyle(fontSize: 22)),
+                        style: TextStyle(fontSize: 28)),
                     selected: state.pageIndex == 1,
                     onTap: () {
                       _bloc?.add(SalesChangeDrawerPage(pageIndex: 1));
                       Navigator.pop(context);
                     },
                   ),
+                  SizedBox(height: 5),
                   ListTile(
                     title: Text('Ordenes de entrega',
-                        style: TextStyle(fontSize: 22)),
+                        style: TextStyle(fontSize: 28)),
                     selected: state.pageIndex == 2,
                     onTap: () {
                       _bloc?.add(SalesChangeDrawerPage(pageIndex: 2));
                       Navigator.pop(context);
                     },
                   ),
+                  SizedBox(height: 30),
                   ListTile(
                     title: Text('Productos pendientes',
-                        style: TextStyle(fontSize: 22)),
+                        style: TextStyle(fontSize: 26)),
                     selected: state.pageIndex == 3,
                     onTap: () {
                       _bloc?.add(SalesChangeDrawerPage(pageIndex: 3));
@@ -109,7 +112,7 @@ class _SalesHomePageState extends State<SalesHomePage> {
                     },
                   ),
                   ListTile(
-                    title: Text('Recibos', style: TextStyle(fontSize: 22)),
+                    title: Text('Recibos', style: TextStyle(fontSize: 26)),
                     selected: state.pageIndex == 4,
                     onTap: () {
                       _bloc?.add(SalesChangeDrawerPage(pageIndex: 4));
@@ -118,7 +121,7 @@ class _SalesHomePageState extends State<SalesHomePage> {
                   ),
                   ListTile(
                     title: Text('Informe de ventas',
-                        style: TextStyle(fontSize: 22)),
+                        style: TextStyle(fontSize: 26)),
                     selected: state.pageIndex == 5,
                     onTap: () {
                       _bloc?.add(SalesChangeDrawerPage(pageIndex: 5));
@@ -127,7 +130,7 @@ class _SalesHomePageState extends State<SalesHomePage> {
                   ),
                   ListTile(
                     title:
-                        Text('Configuración', style: TextStyle(fontSize: 22)),
+                        Text('Configuración', style: TextStyle(fontSize: 26)),
                     selected: state.pageIndex == 6,
                     onTap: () {
                       _bloc?.add(SalesChangeDrawerPage(pageIndex: 6));
@@ -138,7 +141,7 @@ class _SalesHomePageState extends State<SalesHomePage> {
                       height: 50), // Espaciado antes del botón de cerrar sesión
                   ListTile(
                     title:
-                        Text('Cerrar sesión', style: TextStyle(fontSize: 22)),
+                        Text('Cerrar sesión', style: TextStyle(fontSize: 26)),
                     onTap: () {
                       _bloc?.add(Logout());
                       Navigator.pushAndRemoveUntil(

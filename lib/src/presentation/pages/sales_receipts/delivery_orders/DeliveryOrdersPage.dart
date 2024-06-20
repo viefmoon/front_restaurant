@@ -72,8 +72,8 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
       _removeAccents('Orden #${order.id}'),
       styles: PosStyles(
         align: PosAlign.center,
-        height: PosTextSize.size4,
-        width: PosTextSize.size4,
+        height: PosTextSize.size3,
+        width: PosTextSize.size3,
         bold: true,
         fontType: PosFontType.fontA,
       ),
@@ -88,25 +88,13 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
         bytes += generator.text(
             _removeAccents('Telefono: ${order.phoneNumber}'),
             styles: PosStyles(
-                height: PosTextSize.size3,
+                height: PosTextSize.size2,
                 width: PosTextSize.size2,
                 bold: true));
         bytes += generator.text(
             _removeAccents('Direccion: ${order.deliveryAddress}'),
             styles: PosStyles(
-                height: PosTextSize.size3,
-                width: PosTextSize.size2,
-                bold: true));
-        break;
-      case OrderType.dineIn:
-        bytes += generator.text(_removeAccents('Area: ${order.area?.name}'),
-            styles: PosStyles(
-                height: PosTextSize.size3,
-                width: PosTextSize.size2,
-                bold: true));
-        bytes += generator.text(_removeAccents('Mesa: ${order.table?.number}'),
-            styles: PosStyles(
-                height: PosTextSize.size3,
+                height: PosTextSize.size2,
                 width: PosTextSize.size2,
                 bold: true));
         break;
@@ -114,18 +102,30 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
         bytes += generator.text(
             _removeAccents('Nombre del Cliente: ${order.customerName}'),
             styles: PosStyles(
-                height: PosTextSize.size3,
+                height: PosTextSize.size2,
                 width: PosTextSize.size2,
                 bold: true));
         bytes += generator.text(
             _removeAccents('Telefono: ${order.phoneNumber}'),
             styles: PosStyles(
-                height: PosTextSize.size3,
+                height: PosTextSize.size2,
                 width: PosTextSize.size2,
                 bold: true));
         break;
       default:
         break;
+    }
+
+    if (order.comments != null && order.comments!.isNotEmpty) {
+      bytes += generator.text(
+        _removeAccents('Comentarios: ${order.comments}'),
+        styles: PosStyles(
+          align: PosAlign.left,
+          height: PosTextSize.size2,
+          width: PosTextSize.size2,
+          bold: true,
+        ),
+      );
     }
 
     // Añadir la fecha de creación del ticket formateada hasta el minuto en hora local
@@ -178,6 +178,16 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
               height: PosTextSize.size2,
             ));
       }
+      if (item.selectedProductObservations != null &&
+          item.selectedProductObservations!.isNotEmpty) {
+        String modifiersText = _removeAccents(
+            '${item.selectedProductObservations!.map((m) => m.productObservation?.name).join(', ')}');
+        bytes += generator.text(modifiersText,
+            styles: PosStyles(
+              align: PosAlign.left,
+              height: PosTextSize.size2,
+            ));
+      }
       if (item.selectedPizzaFlavors != null &&
           item.selectedPizzaFlavors!.isNotEmpty) {
         String flavorsText = _removeAccents(
@@ -220,6 +230,14 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
               height: PosTextSize.size2, // Aumenta el tamaño del texto
             ));
       }
+      if (item.comments != null && item.comments!.isNotEmpty) {
+        String commentsText = _removeAccents('${item.comments}');
+        bytes += generator.text(commentsText,
+            styles: PosStyles(
+              align: PosAlign.left,
+              height: PosTextSize.size2, // Aumenta el tamaño del texto
+            ));
+      }
     });
 
     // Procesamiento de los ajustes de la orden
@@ -248,26 +266,36 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
       'Total: \$${order.totalCost?.toInt()}',
       styles: PosStyles(
         align: PosAlign.center,
-        height: PosTextSize.size3,
+        height: PosTextSize.size2,
         width: PosTextSize.size2,
       ),
     );
 
     // Verifica si hay un pago registrado
     if (order.amountPaid != null && order.amountPaid! > 0) {
-      bytes +=
-          generator.text('Pagado: \$${order.amountPaid?.toStringAsFixed(2)}');
       bytes += generator.text(
-          'Resto: \$${(order.totalCost! - order.amountPaid!).toStringAsFixed(2)}');
+        'Pagado: \$${order.amountPaid?.toStringAsFixed(2)}',
+        styles: PosStyles(
+          align: PosAlign.center,
+          height: PosTextSize.size2,
+          width: PosTextSize.size2,
+        ),
+      );
+      bytes += generator.text(
+        'Resto: \$${(order.totalCost! - order.amountPaid!).toStringAsFixed(2)}',
+        styles: PosStyles(
+          align: PosAlign.center,
+          height: PosTextSize.size2,
+          width: PosTextSize.size2,
+        ),
+      );
     }
 
     // Añade un mensaje de gracias después del total
     bytes += generator.text(
-      _removeAccents('\n" Gracias por su preferencia "\n'),
+      _removeAccents('\n" Gracias por su preferencia "'),
       styles: PosStyles(align: PosAlign.center),
     );
-
-    bytes += generator.feed(1); // Avanza el papel tres líneas
 
     // Añade el corte de papel al final
     bytes += generator.cut();
@@ -311,18 +339,6 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
                 width: PosTextSize.size1,
                 bold: true));
         break;
-      case OrderType.dineIn:
-        bytes += generator.text(_removeAccents('Area: ${order.area?.name}'),
-            styles: PosStyles(
-                height: PosTextSize.size2,
-                width: PosTextSize.size1,
-                bold: true));
-        bytes += generator.text(_removeAccents('Mesa: ${order.table?.number}'),
-            styles: PosStyles(
-                height: PosTextSize.size2,
-                width: PosTextSize.size1,
-                bold: true));
-        break;
       case OrderType.pickUpWait:
         bytes += generator.text(
             _removeAccents('Nombre del Cliente: ${order.customerName}'),
@@ -339,6 +355,18 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
         break;
       default:
         break;
+    }
+
+    if (order.comments != null && order.comments!.isNotEmpty) {
+      bytes += generator.text(
+        _removeAccents('Comentarios: ${order.comments}'),
+        styles: PosStyles(
+          align: PosAlign.left,
+          height: PosTextSize.size2,
+          width: PosTextSize.size1,
+          bold: true,
+        ),
+      );
     }
 
     // Añadir la fecha de creación del ticket formateada hasta el minuto
@@ -391,6 +419,16 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
               height: PosTextSize.size1,
             ));
       }
+      if (item.selectedProductObservations != null &&
+          item.selectedProductObservations!.isNotEmpty) {
+        String modifiersText = _removeAccents(
+            '${item.selectedProductObservations!.map((m) => m.productObservation?.name).join(', ')}');
+        bytes += generator.text(modifiersText,
+            styles: PosStyles(
+              align: PosAlign.left,
+              height: PosTextSize.size1,
+            ));
+      }
       if (item.selectedPizzaFlavors != null &&
           item.selectedPizzaFlavors!.isNotEmpty) {
         String flavorsText = _removeAccents(
@@ -433,6 +471,14 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
               height: PosTextSize.size1, // Aumenta el tamaño del texto
             ));
       }
+      if (item.comments != null && item.comments!.isNotEmpty) {
+        String commentsText = _removeAccents('${item.comments}');
+        bytes += generator.text(commentsText,
+            styles: PosStyles(
+              align: PosAlign.left,
+              height: PosTextSize.size1, // Aumenta el tamaño del texto
+            ));
+      }
     });
 
     // Procesamiento de los ajustes de la orden
@@ -465,13 +511,23 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
         width: PosTextSize.size2,
       ),
     );
-
-    // Verifica si hay un pago registrado
     if (order.amountPaid != null && order.amountPaid! > 0) {
-      bytes +=
-          generator.text('Pagado: \$${order.amountPaid?.toStringAsFixed(2)}');
       bytes += generator.text(
-          'Resto: \$${(order.totalCost! - order.amountPaid!).toStringAsFixed(2)}');
+        'Pagado: \$${order.amountPaid?.toStringAsFixed(2)}',
+        styles: PosStyles(
+          align: PosAlign.center,
+          height: PosTextSize.size2,
+          width: PosTextSize.size2,
+        ),
+      );
+      bytes += generator.text(
+        'Resto: \$${(order.totalCost! - order.amountPaid!).toStringAsFixed(2)}',
+        styles: PosStyles(
+          align: PosAlign.center,
+          height: PosTextSize.size2,
+          width: PosTextSize.size2,
+        ),
+      );
     }
 
     // Añade un mensaje de gracias después del total
@@ -504,6 +560,7 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('No se encontraron impresoras Bluetooth.'),
+          backgroundColor: Colors.red,
           duration: Duration(seconds: 2),
         ),
       );
@@ -514,47 +571,53 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
     Map<String, dynamic>? selection = await showDialog<Map<String, dynamic>>(
       context: context,
       builder: (BuildContext context) {
-        String? selectedPaperSize = '80mm'; // Valor por defecto
-        return AlertDialog(
-          title: Text('Seleccionar impresora y papel'),
-          content: SingleChildScrollView(
-            child: Column(
-              children: [
-                ListBody(
-                  children: devices
-                      .map((device) => RadioListTile<BluetoothDevice>(
-                            title: Text(device.name ?? ''),
-                            value: device,
-                            groupValue: null,
-                            onChanged: (BluetoothDevice? value) {
-                              Navigator.pop(context, {
-                                'device': value,
-                                'paperSize': selectedPaperSize
-                              });
-                            },
-                          ))
-                      .toList(),
+        String selectedPaperSize = '80mm'; // Valor por defecto
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: Text('Seleccionar impresora y papel'),
+              content: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    ListBody(
+                      children: devices
+                          .map((device) => RadioListTile<BluetoothDevice>(
+                                title: Text(device.name ?? ''),
+                                value: device,
+                                groupValue: null,
+                                onChanged: (BluetoothDevice? value) {
+                                  Navigator.pop(context, {
+                                    'device': value,
+                                    'paperSize': selectedPaperSize
+                                  });
+                                },
+                              ))
+                          .toList(),
+                    ),
+                    Divider(),
+                    ListTile(
+                      title: Text('Tamaño del papel'),
+                      trailing: DropdownButton<String>(
+                        value: selectedPaperSize,
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            selectedPaperSize = newValue!;
+                          });
+                        },
+                        items: <String>['58mm', '80mm']
+                            .map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ],
                 ),
-                Divider(),
-                ListTile(
-                  title: Text('Tamaño del papel'),
-                  trailing: DropdownButton<String>(
-                    value: selectedPaperSize,
-                    onChanged: (String? newValue) {
-                      selectedPaperSize = newValue!;
-                    },
-                    items: <String>['58mm', '80mm']
-                        .map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
@@ -595,6 +658,7 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Ticket impreso correctamente.'),
+              backgroundColor: Colors.green,
               duration: Duration(seconds: 2),
             ),
           );
@@ -612,10 +676,6 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
         }
       }
     }
-  }
-
-  void _printOrder(Order order) {
-    _selectAndPrintTicket(order);
   }
 
   @override
@@ -942,7 +1002,7 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
                           IconButton(
                             icon: Icon(Icons.print, size: 40),
                             onPressed: () {
-                              _printOrder(order);
+                              _selectAndPrintTicket(order);
                             },
                           ),
                         ],
