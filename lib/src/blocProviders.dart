@@ -50,8 +50,9 @@ List<BlocProvider> blocProviders = [
       create: (context) =>
           PendingOrderItemsBloc(ordersUseCases: locator<OrdersUseCases>())),
   BlocProvider<DeliveryOrdersBloc>(
-      create: (context) =>
-          DeliveryOrdersBloc(ordersUseCases: locator<OrdersUseCases>())),
+      create: (context) => DeliveryOrdersBloc(
+          ordersUseCases: locator<OrdersUseCases>(),
+          authUseCases: locator<AuthUseCases>())),
   BlocProvider<OrderUpdateBloc>(
       create: (context) => OrderUpdateBloc(
           ordersUseCases: locator<OrdersUseCases>(),

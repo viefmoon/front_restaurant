@@ -38,3 +38,12 @@ class RevertOrdersToPrepared extends DeliveryOrdersEvent {
   @override
   List<Object> get props => [orders];
 }
+
+class RegisterTicketPrint extends DeliveryOrdersEvent {
+  final int orderId;
+
+  const RegisterTicketPrint({required this.orderId});
+
+  @override
+  List<Object> get props => [orderId];
+}

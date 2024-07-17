@@ -1,4 +1,6 @@
+import 'package:restaurante/src/domain/models/AuthResponse.dart';
 import 'package:restaurante/src/domain/models/Order.dart';
+import 'package:restaurante/src/domain/useCases/auth/AuthUseCases.dart';
 import 'package:restaurante/src/domain/useCases/orders/OrdersUseCases.dart';
 import 'package:restaurante/src/domain/utils/Resource.dart';
 import 'package:restaurante/src/presentation/pages/sales_receipts/delivery_orders/bloc/DeliveryOrdersEvent.dart';
@@ -8,13 +10,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class DeliveryOrdersBloc
     extends Bloc<DeliveryOrdersEvent, DeliveryOrdersState> {
   final OrdersUseCases ordersUseCases;
+  final AuthUseCases authUseCases;
 
-  DeliveryOrdersBloc({required this.ordersUseCases})
-      : super(DeliveryOrdersState()) {
+  DeliveryOrdersBloc({
+    required this.ordersUseCases,
+    required this.authUseCases,
+  }) : super(DeliveryOrdersState()) {
     on<LoadDeliveryOrders>(_onLoadDeliveryOrders);
     on<MarkOrdersAsInDelivery>(_onMarkOrdersAsInDelivery);
     on<MarkOrdersAsDelivered>(_onMarkOrdersAsDelivered);
     on<RevertOrdersToPrepared>(_onRevertOrdersToPrepared);
+    on<RegisterTicketPrint>(_onRegisterTicketPrint);
   }
 
   Future<void> _onLoadDeliveryOrders(
@@ -92,6 +98,24 @@ class DeliveryOrdersBloc
     } catch (e) {
       emit(state.copyWith(
           response: Error('Error al revertir las órdenes a "Preparado": $e')));
+    }
+  }
+
+  Future<void> _onRegisterTicketPrint(
+      RegisterTicketPrint event, Emitter<DeliveryOrdersState> emit) async {
+    emit(state.copyWith(response: Loading()));
+
+    // Obtener el nombre de usuario
+    AuthResponse? userSession = await authUseCases.getUserSession.run();
+    String? printedBy = userSession?.user.name;
+
+    final Resource result = await ordersUseCases.registerTicketPrint
+        .run(event.orderId, printedBy ?? '');
+
+    if (result is Success) {
+      emit(state.copyWith(response: Success(result.data)));
+    } else if (result is Error) {
+      emit(state.copyWith(response: Error(result.message)));
     }
   }
 }

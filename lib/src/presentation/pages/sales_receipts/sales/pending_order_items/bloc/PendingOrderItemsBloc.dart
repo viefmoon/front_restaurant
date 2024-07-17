@@ -25,7 +25,7 @@ class PendingOrderItemsBloc
         "Pizzas",
         "Hamburguesas",
         "Ensaladas",
-        "Frappes y Malteadas",
+        "Frappes y Postres",
         "Jarras",
         "Cocteleria",
         "Bebidas",

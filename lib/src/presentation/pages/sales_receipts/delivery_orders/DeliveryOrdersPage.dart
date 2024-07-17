@@ -641,7 +641,7 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
             await bluetooth.connect(selectedDevice).timeout(timeoutDuration);
           }
 
-          // Generar el contenido del ticket segn el tamaño del papel seleccionado
+          // Generar el contenido del ticket según el tamaño del papel seleccionado
           List<int> ticketContent;
           if (selectedPaperSize == '58mm') {
             ticketContent = await _generateTicketContent58(order);
@@ -658,10 +658,18 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Ticket impreso correctamente.'),
-              backgroundColor: Colors.green,
+              backgroundColor: Colors.lime,
               duration: Duration(seconds: 2),
             ),
           );
+
+          // Registrar la impresión del ticket
+          if (order.id != null) {
+            context.read<DeliveryOrdersBloc>().add(
+                  RegisterTicketPrint(orderId: order.id!),
+                );
+          }
+
           return; // Salir de la función si la impresión fue exitosa
         } catch (e) {
           if (attempt == maxRetries) {
@@ -676,6 +684,13 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
         }
       }
     }
+  }
+
+  String _formatPrintTime(DateTime? printTime) {
+    if (printTime == null) {
+      return '';
+    }
+    return DateFormat('HH:mm').format(printTime.toLocal());
   }
 
   @override
@@ -795,7 +810,7 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
                         style: TextStyle(fontSize: 18, color: Colors.white),
                       ),
                       backgroundColor: Colors.green,
-                      duration: Duration(seconds: 2),
+                      duration: Duration(seconds: 1),
                     ),
                   );
                 } else if (state.response is Error) {
@@ -872,6 +887,14 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
                               'Bebida') ??
                           false;
 
+                      String printDetails = '';
+                      if (order.orderPrints != null) {
+                        for (var print in order.orderPrints!) {
+                          printDetails +=
+                              'Impreso ${print.printedBy} ${_formatPrintTime(print.printTime)}, ';
+                        }
+                      }
+
                       return Row(
                         children: [
                           Expanded(
@@ -938,7 +961,7 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
                                       displayText,
                                       style: TextStyle(
                                         color: textColor,
-                                        fontSize: 22,
+                                        fontSize: 21,
                                       ),
                                     ),
                                     RichText(
@@ -966,11 +989,19 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
                                           ),
                                           if (containsBeverage)
                                             TextSpan(
-                                              text: ' BEBIDA',
+                                              text: ' BEBIDA ',
                                               style: TextStyle(
                                                 fontSize: 17,
                                               ),
-                                            )
+                                            ),
+                                          TextSpan(
+                                            text: '${printDetails.trim()}',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: Color.fromARGB(
+                                                  255, 190, 66, 212),
+                                            ),
+                                          ),
                                         ],
                                       ),
                                     ),
