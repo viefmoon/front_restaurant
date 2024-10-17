@@ -2,7 +2,7 @@ import 'package:restaurante/src/domain/models/OrderItem.dart';
 import 'package:restaurante/src/domain/models/Product.dart';
 
 class ProductVariant {
-  final int id;
+  final String id;
   final String name;
   final double? price;
   Product? product; // Relación ManyToOne con Product

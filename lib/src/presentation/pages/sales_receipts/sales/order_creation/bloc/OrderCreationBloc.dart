@@ -323,7 +323,6 @@ class OrderCreationBloc extends Bloc<OrderCreationEvent, OrderCreationState> {
             productVariant: orderItem.productVariant,
             price: orderItem.price,
             selectedModifiers: orderItem.selectedModifiers,
-            selectedProductObservations: orderItem.selectedProductObservations,
             selectedPizzaFlavors: orderItem.selectedPizzaFlavors,
             selectedPizzaIngredients: orderItem.selectedPizzaIngredients,
           );

@@ -3,12 +3,10 @@ import 'package:restaurante/src/domain/models/OrderItem.dart';
 import 'package:restaurante/src/domain/models/PizzaFlavor.dart';
 import 'package:restaurante/src/domain/models/PizzaIngredient.dart';
 import 'package:restaurante/src/domain/models/Product.dart';
-import 'package:restaurante/src/domain/models/ProductObservationType.dart';
 import 'package:restaurante/src/domain/models/ProductVariant.dart';
 import 'package:restaurante/src/domain/models/SelectedModifier.dart';
 import 'package:restaurante/src/domain/models/SelectedPizzaFlavor.dart';
 import 'package:restaurante/src/domain/models/SelectedPizzaIngredient.dart';
-import 'package:restaurante/src/domain/models/SelectedProductObservation.dart';
 import 'package:restaurante/src/presentation/pages/sales_receipts/sales/order_creation/bloc/OrderCreationBloc.dart';
 import 'package:restaurante/src/presentation/pages/sales_receipts/sales/order_creation/bloc/OrderCreationEvent.dart';
 import 'package:restaurante/src/presentation/pages/sales_receipts/sales/order_creation/bloc/OrderCreationState.dart';
@@ -40,7 +38,6 @@ class _ProductPersonalizationPageState
     extends State<ProductPersonalizationPage> {
   ProductVariant? selectedVariant;
   List<SelectedModifier> selectedModifiers = [];
-  List<SelectedProductObservation> selectedObservations = [];
   List<SelectedPizzaIngredient> selectedPizzaIngredients = [];
   List<SelectedPizzaFlavor> selectedPizzaFlavors = [];
   String? comments;
@@ -67,8 +64,6 @@ class _ProductPersonalizationPageState
       selectedVariant = widget.existingOrderItem!.productVariant;
       selectedModifiers =
           List.from(widget.existingOrderItem?.selectedModifiers ?? []);
-      selectedObservations = List.from(
-          widget.existingOrderItem?.selectedProductObservations ?? []);
       selectedPizzaFlavors =
           List.from(widget.existingOrderItem?.selectedPizzaFlavors ?? []);
       selectedPizzaIngredients =
@@ -242,10 +237,6 @@ class _ProductPersonalizationPageState
               ...widget.product.modifierTypes!
                   .map(_buildModifierTypeSection)
                   .toList(),
-            if (widget.product.productObservationTypes != null)
-              ...widget.product.productObservationTypes!
-                  .map(_buildObservationTypeSection)
-                  .toList(),
             SizedBox(height: 16.0), // Espaciado agregado arriba de comentarios
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -284,7 +275,6 @@ class _ProductPersonalizationPageState
         product: widget.product,
         productVariant: selectedVariant,
         selectedModifiers: selectedModifiers,
-        selectedProductObservations: selectedObservations,
         selectedPizzaFlavors: selectedPizzaFlavors,
         selectedPizzaIngredients: selectedPizzaIngredients,
         comments: comments,
@@ -301,7 +291,6 @@ class _ProductPersonalizationPageState
         product: widget.product,
         productVariant: selectedVariant,
         selectedModifiers: selectedModifiers,
-        selectedProductObservations: selectedObservations,
         selectedPizzaFlavors: selectedPizzaFlavors,
         selectedPizzaIngredients: selectedPizzaIngredients,
         comments: comments,
@@ -341,7 +330,6 @@ class _ProductPersonalizationPageState
     setState(() {
       selectedVariant = null;
       selectedModifiers = [];
-      selectedObservations = [];
       selectedPizzaIngredients = [];
       selectedPizzaFlavors = [];
       comments = null;
@@ -442,51 +430,6 @@ class _ProductPersonalizationPageState
                     });
                   },
                 )) ??
-            []),
-      ],
-    );
-  }
-
-  Widget _buildObservationTypeSection(ProductObservationType observationType) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(observationType.name,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-        ),
-        ...(observationType.productObservations
-                ?.map((productObservation) => CheckboxListTile(
-                      title: Text(productObservation.name),
-                      value: selectedObservations.any((selectedObservation) =>
-                          selectedObservation.productObservation?.id ==
-                          productObservation.id), // Compara por ID
-                      onChanged: (bool? value) {
-                        setState(() {
-                          if (value == true) {
-                            if (!observationType.acceptsMultiple) {
-                              // Si no se aceptan múltiples, primero elimina las observaciones existentes del mismo tipo
-                              selectedObservations.removeWhere(
-                                  (selectedObservation) => observationType
-                                      .productObservations!
-                                      .any((po) =>
-                                          po.id ==
-                                          selectedObservation
-                                              .productObservation?.id));
-                            }
-                            selectedObservations.add(SelectedProductObservation(
-                                productObservation: productObservation));
-                          } else {
-                            selectedObservations.removeWhere(
-                                (selectedObservation) =>
-                                    selectedObservation
-                                        .productObservation?.id ==
-                                    productObservation.id);
-                          }
-                        });
-                      },
-                    )) ??
             []),
       ],
     );

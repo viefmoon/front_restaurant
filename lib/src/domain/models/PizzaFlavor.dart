@@ -1,7 +1,7 @@
 import 'package:restaurante/src/domain/models/SelectedPizzaIngredient.dart';
 
 class PizzaFlavor {
-  final int id;
+  final String id;
   final String name;
   final PizzaHalf? half;
   final double? price; // 'price' ahora puede ser nulo

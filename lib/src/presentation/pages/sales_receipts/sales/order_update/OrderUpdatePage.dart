@@ -681,13 +681,6 @@ class _OrderUpdatePageState extends State<OrderUpdatePage> {
                     style: TextStyle(color: textColor),
                   ));
                 }
-                if (orderItem.selectedProductObservations != null &&
-                    orderItem.selectedProductObservations!.isNotEmpty) {
-                  details.add(Text(
-                    'Observaciones: ${orderItem.selectedProductObservations!.map((o) => o.productObservation?.name).join(', ')}',
-                    style: TextStyle(color: textColor),
-                  ));
-                }
                 if (orderItem.comments != null &&
                     orderItem.comments!.isNotEmpty) {
                   details.add(Text(

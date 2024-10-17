@@ -144,7 +144,6 @@ class ProductSelectionPage extends StatelessWidget {
         bool requiresPersonalization =
             (product.productVariants?.isNotEmpty ?? false) ||
                 (product.modifierTypes?.isNotEmpty ?? false) ||
-                (product.productObservationTypes?.isNotEmpty ?? false) ||
                 (product.pizzaFlavors?.isNotEmpty ?? false) ||
                 (product.pizzaIngredients?.isNotEmpty ?? false);
 

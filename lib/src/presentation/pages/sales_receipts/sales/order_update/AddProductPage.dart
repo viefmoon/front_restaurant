@@ -159,7 +159,6 @@ class _AddProductPageState extends State<AddProductPage> {
         bool requiresPersonalization =
             (product.productVariants?.isNotEmpty ?? false) ||
                 (product.modifierTypes?.isNotEmpty ?? false) ||
-                (product.productObservationTypes?.isNotEmpty ?? false) ||
                 (product.pizzaFlavors?.isNotEmpty ?? false) ||
                 (product.pizzaIngredients?.isNotEmpty ?? false);
 
@@ -177,7 +176,6 @@ class _AddProductPageState extends State<AddProductPage> {
                 order: null,
                 productVariant: null,
                 selectedModifiers: [],
-                selectedProductObservations: [],
                 selectedPizzaFlavors: [],
                 selectedPizzaIngredients: [],
                 price: product.price,

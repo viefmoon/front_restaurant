@@ -1,7 +1,7 @@
 import 'package:restaurante/src/domain/models/ModifierType.dart';
 
 class Modifier {
-  final int id;
+  final String id;
   final String name; // Ahora 'name' es no nulo
   final double? price;
   final ModifierType? modifierType;

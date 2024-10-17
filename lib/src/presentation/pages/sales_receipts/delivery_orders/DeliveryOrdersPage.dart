@@ -178,16 +178,6 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
               height: PosTextSize.size2,
             ));
       }
-      if (item.selectedProductObservations != null &&
-          item.selectedProductObservations!.isNotEmpty) {
-        String modifiersText = _removeAccents(
-            '${item.selectedProductObservations!.map((m) => m.productObservation?.name).join(', ')}');
-        bytes += generator.text(modifiersText,
-            styles: PosStyles(
-              align: PosAlign.left,
-              height: PosTextSize.size2,
-            ));
-      }
       if (item.selectedPizzaFlavors != null &&
           item.selectedPizzaFlavors!.isNotEmpty) {
         String flavorsText = _removeAccents(
@@ -413,16 +403,6 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
           item.selectedModifiers!.isNotEmpty) {
         String modifiersText = _removeAccents(
             '${item.selectedModifiers!.map((m) => m.modifier?.name).join(', ')}');
-        bytes += generator.text(modifiersText,
-            styles: PosStyles(
-              align: PosAlign.left,
-              height: PosTextSize.size1,
-            ));
-      }
-      if (item.selectedProductObservations != null &&
-          item.selectedProductObservations!.isNotEmpty) {
-        String modifiersText = _removeAccents(
-            '${item.selectedProductObservations!.map((m) => m.productObservation?.name).join(', ')}');
         bytes += generator.text(modifiersText,
             styles: PosStyles(
               align: PosAlign.left,
@@ -887,7 +867,7 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
                               'Bebida') ??
                           false;
 
-                      String printDetails = '';
+                      String printDetails = '-';
                       if (order.orderPrints != null) {
                         for (var print in order.orderPrints!) {
                           printDetails +=

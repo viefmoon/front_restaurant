@@ -2,19 +2,17 @@ import 'package:restaurante/src/domain/models/ModifierType.dart';
 import 'package:restaurante/src/domain/models/OrderItem.dart';
 import 'package:restaurante/src/domain/models/PizzaFlavor.dart';
 import 'package:restaurante/src/domain/models/PizzaIngredient.dart';
-import 'package:restaurante/src/domain/models/ProductObservationType.dart';
 import 'package:restaurante/src/domain/models/ProductVariant.dart';
 import 'package:restaurante/src/domain/models/Subcategory.dart';
 
 class Product {
-  final int id;
+  final String id;
   final String name;
   final double? price;
   final String? imageUrl;
   Subcategory? subcategory;
   List<ProductVariant>? productVariants;
   List<ModifierType>? modifierTypes;
-  List<ProductObservationType>? productObservationTypes;
   List<PizzaFlavor>? pizzaFlavors;
   List<PizzaIngredient>? pizzaIngredients;
   List<OrderItem>? orderItems;
@@ -27,7 +25,6 @@ class Product {
     this.subcategory,
     this.productVariants,
     this.modifierTypes,
-    this.productObservationTypes,
     this.pizzaFlavors,
     this.pizzaIngredients,
     this.orderItems,
@@ -50,11 +47,6 @@ class Product {
       modifierTypes: json['modifierTypes'] != null
           ? (json['modifierTypes'] as List)
               .map((i) => ModifierType.fromJson(i))
-              .toList()
-          : null,
-      productObservationTypes: json['productObservationTypes'] != null
-          ? (json['productObservationTypes'] as List)
-              .map((i) => ProductObservationType.fromJson(i))
               .toList()
           : null,
       pizzaFlavors: json['pizzaFlavors'] != null
@@ -91,10 +83,6 @@ class Product {
     if (modifierTypes != null) {
       data['modifierTypes'] = modifierTypes!.map((v) => v.toJson()).toList();
     }
-    if (productObservationTypes != null) {
-      data['productObservationTypes'] =
-          productObservationTypes!.map((v) => v.toJson()).toList();
-    }
     if (pizzaFlavors != null) {
       data['pizzaFlavors'] = pizzaFlavors!.map((v) => v.toJson()).toList();
     }
@@ -109,14 +97,13 @@ class Product {
   }
 
   Product copyWith({
-    int? id,
+    String? id,
     String? name,
     double? price,
     String? imageUrl,
     Subcategory? subcategory,
     List<ProductVariant>? productVariants,
     List<ModifierType>? modifierTypes,
-    List<ProductObservationType>? productObservationTypes,
     List<PizzaFlavor>? pizzaFlavors,
     List<PizzaIngredient>? pizzaIngredients,
     List<OrderItem>? orderItems,
@@ -129,8 +116,6 @@ class Product {
       subcategory: subcategory ?? this.subcategory,
       productVariants: productVariants ?? this.productVariants,
       modifierTypes: modifierTypes ?? this.modifierTypes,
-      productObservationTypes:
-          productObservationTypes ?? this.productObservationTypes,
       pizzaFlavors: pizzaFlavors ?? this.pizzaFlavors,
       pizzaIngredients: pizzaIngredients ?? this.pizzaIngredients,
       orderItems: orderItems ?? this.orderItems,

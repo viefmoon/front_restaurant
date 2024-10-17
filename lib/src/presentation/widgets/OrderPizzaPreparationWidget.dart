@@ -546,12 +546,6 @@ class _OrderPizzaPreparationWidgetState
                       smallerDecoratedTextStyle.copyWith(color: colorForItem),
                 )) ??
             [],
-        ...orderItem.selectedProductObservations?.map((observation) => Text(
-                  observation.productObservation!.name,
-                  style:
-                      smallerDecoratedTextStyle.copyWith(color: colorForItem),
-                )) ??
-            [],
       ];
 
 // Agrupar ingredientes por mitad

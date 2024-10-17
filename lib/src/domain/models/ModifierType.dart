@@ -1,7 +1,7 @@
 import 'package:restaurante/src/domain/models/Modifier.dart';
 
 class ModifierType {
-  final int id;
+  final String id;
   final String name; // 'name' ahora es no nulo
   final bool acceptsMultiple; // 'acceptsMultiple' ahora es no nulo y requerido
   final List<Modifier>? modifiers;

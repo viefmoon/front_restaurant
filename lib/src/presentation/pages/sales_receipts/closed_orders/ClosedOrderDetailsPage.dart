@@ -217,13 +217,6 @@ class _ClosedOrderDetailsPageState extends State<ClosedOrderDetailsPage> {
         style: TextStyle(fontSize: 16),
       ));
     }
-    if (item.selectedProductObservations != null &&
-        item.selectedProductObservations!.isNotEmpty) {
-      details.add(Text(
-        'Observaciones: ${item.selectedProductObservations!.map((o) => o.productObservation?.name).join(', ')}',
-        style: TextStyle(fontSize: 16),
-      ));
-    }
     if (item.comments != null && item.comments!.isNotEmpty) {
       details.add(Text(
         'Comentarios: ${item.comments}',

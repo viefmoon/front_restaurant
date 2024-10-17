@@ -512,12 +512,6 @@ class _OrderBurgerPreparationWidgetState
                       smallerDecoratedTextStyle.copyWith(color: colorForItem),
                 )) ??
             [],
-        ...orderItem.selectedProductObservations?.map((observation) => Text(
-                  observation.productObservation!.name,
-                  style:
-                      smallerDecoratedTextStyle.copyWith(color: colorForItem),
-                )) ??
-            [],
       ];
 
       // Añadir comentarios del OrderItem si existen
