@@ -1,19 +1,23 @@
 import 'package:restaurante/src/domain/models/OrderItem.dart';
 import 'package:restaurante/src/domain/models/PizzaIngredient.dart';
 
-enum PizzaHalf { left, right, none }
+enum PizzaHalf { left, right, full }
+
+enum IngredientAction { add, remove }
 
 class SelectedPizzaIngredient {
   final int? id;
   final OrderItem? orderItem;
   final PizzaIngredient? pizzaIngredient;
   final PizzaHalf? half;
+  final IngredientAction? action;
 
   SelectedPizzaIngredient({
     this.id,
     this.orderItem,
     this.pizzaIngredient,
     this.half,
+    this.action,
   });
 
   factory SelectedPizzaIngredient.fromJson(Map<String, dynamic> json) {
@@ -28,10 +32,15 @@ class SelectedPizzaIngredient {
       half: json['half'] != null
           ? PizzaHalf.values.firstWhere(
               (e) => e.toString().split('.').last == json['half'],
-              orElse: () => PizzaHalf
-                  .none, // Proporciona un valor predeterminado si 'half' no está presente
+              orElse: () => PizzaHalf.full,
             )
-          : null, // Retorna null si 'half' no está en el JSON
+          : null,
+      action: json['action'] != null
+          ? IngredientAction.values.firstWhere(
+              (e) => e.toString().split('.').last == json['action'],
+              orElse: () => IngredientAction.add,
+            )
+          : null,
     );
   }
 
@@ -42,10 +51,8 @@ class SelectedPizzaIngredient {
     if (orderItem != null) {
       data['orderItem'] = orderItem!.toJson();
     }
-    data['half'] = half
-        .toString()
-        .split('.')
-        .last; // Conversión de enum a String para JSON
+    data['half'] = half.toString().split('.').last;
+    data['action'] = action.toString().split('.').last;
 
     return data;
   }

@@ -193,15 +193,21 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
         String ingredientsText = '';
         final ingredientsLeft = _removeAccents(item.selectedPizzaIngredients!
             .where((i) => i.half == PizzaHalf.left)
-            .map((i) => i.pizzaIngredient?.name)
+            .map((i) => i.action == IngredientAction.remove
+                ? 'sin ${i.pizzaIngredient?.name}'
+                : i.pizzaIngredient?.name)
             .join(', '));
         final ingredientsRight = _removeAccents(item.selectedPizzaIngredients!
             .where((i) => i.half == PizzaHalf.right)
-            .map((i) => i.pizzaIngredient?.name)
+            .map((i) => i.action == IngredientAction.remove
+                ? 'sin ${i.pizzaIngredient?.name}'
+                : i.pizzaIngredient?.name)
             .join(', '));
         final ingredientsNone = _removeAccents(item.selectedPizzaIngredients!
-            .where((i) => i.half == PizzaHalf.none)
-            .map((i) => i.pizzaIngredient?.name)
+            .where((i) => i.half == PizzaHalf.full)
+            .map((i) => i.action == IngredientAction.remove
+                ? 'sin ${i.pizzaIngredient?.name}'
+                : i.pizzaIngredient?.name)
             .join(', '));
         if (ingredientsLeft.isNotEmpty) {
           ingredientsText += ingredientsLeft;
@@ -424,15 +430,21 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
         String ingredientsText = '';
         final ingredientsLeft = _removeAccents(item.selectedPizzaIngredients!
             .where((i) => i.half == PizzaHalf.left)
-            .map((i) => i.pizzaIngredient?.name)
+            .map((i) => i.action == IngredientAction.remove
+                ? 'sin ${i.pizzaIngredient?.name}'
+                : i.pizzaIngredient?.name)
             .join(', '));
         final ingredientsRight = _removeAccents(item.selectedPizzaIngredients!
             .where((i) => i.half == PizzaHalf.right)
-            .map((i) => i.pizzaIngredient?.name)
+            .map((i) => i.action == IngredientAction.remove
+                ? 'sin ${i.pizzaIngredient?.name}'
+                : i.pizzaIngredient?.name)
             .join(', '));
         final ingredientsNone = _removeAccents(item.selectedPizzaIngredients!
-            .where((i) => i.half == PizzaHalf.none)
-            .map((i) => i.pizzaIngredient?.name)
+            .where((i) => i.half == PizzaHalf.full)
+            .map((i) => i.action == IngredientAction.remove
+                ? 'sin ${i.pizzaIngredient?.name}'
+                : i.pizzaIngredient?.name)
             .join(', '));
         if (ingredientsLeft.isNotEmpty) {
           ingredientsText += ingredientsLeft;

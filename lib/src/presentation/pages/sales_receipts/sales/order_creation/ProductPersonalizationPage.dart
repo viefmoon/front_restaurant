@@ -77,7 +77,7 @@ class _ProductPersonalizationPageState
 
         // Verifica si hay ingredientes asignados a una mitad específica para habilitar "Crear dos mitades"
         _createTwoHalves = selectedPizzaIngredients
-            .any((ingredient) => ingredient.half != PizzaHalf.none);
+            .any((ingredient) => ingredient.half != PizzaHalf.full);
       }
     }
 
@@ -524,32 +524,83 @@ class _ProductPersonalizationPageState
               );
             },
             body: Column(
-              children: ingredients
-                  .map((ingredient) => CheckboxListTile(
-                        title: Text(ingredient.name),
-                        value: selectedPizzaIngredients.any(
-                            (selectedIngredient) =>
-                                selectedIngredient.pizzaIngredient?.id ==
-                                    ingredient.id && // Compara por ID
-                                selectedIngredient.half == half),
-                        onChanged: (bool? value) {
-                          setState(() {
-                            if (value == true) {
-                              selectedPizzaIngredients.add(
-                                  SelectedPizzaIngredient(
-                                      pizzaIngredient: ingredient, half: half));
-                            } else {
-                              selectedPizzaIngredients.removeWhere(
-                                  (selectedIngredient) =>
-                                      selectedIngredient.pizzaIngredient?.id ==
-                                          ingredient.id && // Compara por ID
-                                      selectedIngredient.half == half);
-                            }
-                            _updatePrice();
-                          });
-                        },
-                      ))
-                  .toList(),
+              children: ingredients.map((ingredient) {
+                // Buscar si el ingrediente ya está seleccionado
+                final selectedIngredient = selectedPizzaIngredients.firstWhere(
+                  (selected) =>
+                      selected.pizzaIngredient?.id == ingredient.id &&
+                      selected.half == half,
+                  orElse: () => SelectedPizzaIngredient(
+                      pizzaIngredient: ingredient,
+                      half: half,
+                      action: IngredientAction.add),
+                );
+
+                return Column(
+                  children: [
+                    CheckboxListTile(
+                      title: Text(ingredient.name),
+                      value: selectedPizzaIngredients.any((selected) =>
+                          selected.pizzaIngredient?.id == ingredient.id &&
+                          selected.half == half),
+                      onChanged: (bool? value) {
+                        setState(() {
+                          if (value == true) {
+                            selectedPizzaIngredients
+                                .add(SelectedPizzaIngredient(
+                              pizzaIngredient: ingredient,
+                              half: half,
+                              action: IngredientAction.add,
+                            ));
+                          } else {
+                            selectedPizzaIngredients.removeWhere((selected) =>
+                                selected.pizzaIngredient?.id == ingredient.id &&
+                                selected.half == half);
+                          }
+                          _updatePrice();
+                        });
+                      },
+                    ),
+                    // Mostrar el switch solo si el ingrediente está seleccionado
+                    if (selectedPizzaIngredients.any((selected) =>
+                        selected.pizzaIngredient?.id == ingredient.id &&
+                        selected.half == half))
+                      Padding(
+                        padding: EdgeInsets.only(left: 72.0, right: 16.0),
+                        child: Row(
+                          children: [
+                            Text('Quitar'),
+                            Switch(
+                              value: selectedIngredient.action ==
+                                  IngredientAction.add,
+                              onChanged: (bool value) {
+                                setState(() {
+                                  // Encontrar y actualizar el ingrediente existente
+                                  int index = selectedPizzaIngredients
+                                      .indexWhere((selected) =>
+                                          selected.pizzaIngredient?.id ==
+                                              ingredient.id &&
+                                          selected.half == half);
+                                  if (index != -1) {
+                                    selectedPizzaIngredients[index] =
+                                        SelectedPizzaIngredient(
+                                      pizzaIngredient: ingredient,
+                                      half: half,
+                                      action: value
+                                          ? IngredientAction.add
+                                          : IngredientAction.remove,
+                                    );
+                                  }
+                                });
+                              },
+                            ),
+                            Text('Añadir'),
+                          ],
+                        ),
+                      ),
+                  ],
+                );
+              }).toList(),
             ),
             isExpanded: (half == PizzaHalf.left)
                 ? _isLeftExpanded
@@ -570,7 +621,7 @@ class _ProductPersonalizationPageState
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         ),
         if (!_createTwoHalves)
-          buildIngredientList(PizzaHalf.none, 'Ingredientes'),
+          buildIngredientList(PizzaHalf.full, 'Ingredientes'),
         if (_createTwoHalves) ...[
           buildIngredientList(PizzaHalf.left, 'Primera mitad:'),
           buildIngredientList(PizzaHalf.right, 'Segunda mitad:'),

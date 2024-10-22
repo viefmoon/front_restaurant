@@ -188,15 +188,18 @@ class _ClosedOrderDetailsPageState extends State<ClosedOrderDetailsPage> {
         item.selectedPizzaIngredients!.isNotEmpty) {
       final ingredientsLeft = item.selectedPizzaIngredients!
           .where((i) => i.half == PizzaHalf.left)
-          .map((i) => i.pizzaIngredient?.name)
+          .map((i) =>
+              '${i.action == IngredientAction.remove ? 'sin ' : ''}${i.pizzaIngredient?.name}')
           .join(', ');
       final ingredientsRight = item.selectedPizzaIngredients!
           .where((i) => i.half == PizzaHalf.right)
-          .map((i) => i.pizzaIngredient?.name)
+          .map((i) =>
+              '${i.action == IngredientAction.remove ? 'sin ' : ''}${i.pizzaIngredient?.name}')
           .join(', ');
       final ingredientsNone = item.selectedPizzaIngredients!
-          .where((i) => i.half == PizzaHalf.none)
-          .map((i) => i.pizzaIngredient?.name)
+          .where((i) => i.half == PizzaHalf.full)
+          .map((i) =>
+              '${i.action == IngredientAction.remove ? 'sin ' : ''}${i.pizzaIngredient?.name}')
           .join(', ');
 
       String ingredientsText = '';

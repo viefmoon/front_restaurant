@@ -77,7 +77,7 @@ class _UpdateProductPersonalizationPageState
 
         // Verifica si hay ingredientes asignados a una mitad específica para habilitar "Crear dos mitades"
         _createTwoHalves = selectedPizzaIngredients
-            .any((ingredient) => ingredient.half != PizzaHalf.none);
+            .any((ingredient) => ingredient.half != PizzaHalf.full);
       }
     }
 
@@ -562,7 +562,7 @@ class _UpdateProductPersonalizationPageState
         ),
         if (!_createTwoHalves)
           buildIngredientPanel(
-              'Ingredientes', PizzaHalf.none, _isIngredientsExpanded),
+              'Ingredientes', PizzaHalf.full, _isIngredientsExpanded),
         if (_createTwoHalves) ...[
           buildIngredientPanel(
               'Primera mitad:', PizzaHalf.left, _isLeftIngredientsExpanded),

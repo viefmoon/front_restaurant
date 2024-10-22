@@ -20,8 +20,7 @@ class PizzaFlavor {
       half: json['half'] != null
           ? PizzaHalf.values.firstWhere(
               (e) => e.toString().split('.').last == json['half'],
-              orElse: () => PizzaHalf
-                  .none, // Proporciona un valor predeterminado si 'half' no está presente
+              orElse: () => PizzaHalf.full,
             )
           : null,
       price: json['price'] != null

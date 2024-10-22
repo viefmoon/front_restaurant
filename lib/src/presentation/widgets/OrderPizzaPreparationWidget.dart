@@ -551,17 +551,23 @@ class _OrderPizzaPreparationWidgetState
 // Agrupar ingredientes por mitad
       var ingredientsLeft = orderItem.selectedPizzaIngredients
               ?.where((ingredient) => ingredient.half == PizzaHalf.left)
-              .map((ingredient) => ingredient.pizzaIngredient?.name)
+              .map((ingredient) => ingredient.action == IngredientAction.remove
+                  ? "sin ${ingredient.pizzaIngredient?.name}"
+                  : ingredient.pizzaIngredient?.name)
               .toList() ??
           [];
       var ingredientsRight = orderItem.selectedPizzaIngredients
               ?.where((ingredient) => ingredient.half == PizzaHalf.right)
-              .map((ingredient) => ingredient.pizzaIngredient?.name)
+              .map((ingredient) => ingredient.action == IngredientAction.remove
+                  ? "sin ${ingredient.pizzaIngredient?.name}"
+                  : ingredient.pizzaIngredient?.name)
               .toList() ??
           [];
       var ingredientsNone = orderItem.selectedPizzaIngredients
-              ?.where((ingredient) => ingredient.half == PizzaHalf.none)
-              .map((ingredient) => ingredient.pizzaIngredient?.name)
+              ?.where((ingredient) => ingredient.half == PizzaHalf.full)
+              .map((ingredient) => ingredient.action == IngredientAction.remove
+                  ? "sin ${ingredient.pizzaIngredient?.name}"
+                  : ingredient.pizzaIngredient?.name)
               .toList() ??
           [];
 

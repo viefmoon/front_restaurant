@@ -654,15 +654,21 @@ class _OrderUpdatePageState extends State<OrderUpdatePage> {
                     orderItem.selectedPizzaIngredients!.isNotEmpty) {
                   final ingredientsLeft = orderItem.selectedPizzaIngredients!
                       .where((i) => i.half == PizzaHalf.left)
-                      .map((i) => i.pizzaIngredient?.name)
+                      .map((i) => i.action == IngredientAction.remove
+                          ? 'sin ${i.pizzaIngredient?.name}'
+                          : i.pizzaIngredient?.name)
                       .join(', ');
                   final ingredientsRight = orderItem.selectedPizzaIngredients!
                       .where((i) => i.half == PizzaHalf.right)
-                      .map((i) => i.pizzaIngredient?.name)
+                      .map((i) => i.action == IngredientAction.remove
+                          ? 'sin ${i.pizzaIngredient?.name}'
+                          : i.pizzaIngredient?.name)
                       .join(', ');
                   final ingredientsNone = orderItem.selectedPizzaIngredients!
-                      .where((i) => i.half == PizzaHalf.none)
-                      .map((i) => i.pizzaIngredient?.name)
+                      .where((i) => i.half == PizzaHalf.full)
+                      .map((i) => i.action == IngredientAction.remove
+                          ? 'sin ${i.pizzaIngredient?.name}'
+                          : i.pizzaIngredient?.name)
                       .join(', ');
 
                   String ingredientsText = '';
