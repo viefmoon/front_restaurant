@@ -1007,6 +1007,15 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
                                               fontSize: 16,
                                             ),
                                           ),
+                                          if (order.createdBy != null &&
+                                              order.createdBy!.isNotEmpty)
+                                            TextSpan(
+                                              text: ' ${order.createdBy}',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
                                           if (containsBeverage)
                                             TextSpan(
                                               text: ' BEBIDA ',

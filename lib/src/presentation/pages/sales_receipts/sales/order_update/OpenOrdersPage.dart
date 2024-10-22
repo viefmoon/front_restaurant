@@ -265,6 +265,12 @@ class _OpenOrdersPageState extends State<OpenOrdersPage> {
                                 style: TextStyle(
                                     color: paymentStatusColor, fontSize: 18),
                               ),
+                              if (order.createdBy != null)
+                                TextSpan(
+                                  text: ' ${order.createdBy}',
+                                  style: TextStyle(
+                                      color: Colors.grey[600], fontSize: 16),
+                                ),
                             ],
                           ),
                         ),
