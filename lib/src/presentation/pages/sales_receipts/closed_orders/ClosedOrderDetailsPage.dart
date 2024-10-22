@@ -189,17 +189,17 @@ class _ClosedOrderDetailsPageState extends State<ClosedOrderDetailsPage> {
       final ingredientsLeft = item.selectedPizzaIngredients!
           .where((i) => i.half == PizzaHalf.left)
           .map((i) =>
-              '${i.action == IngredientAction.remove ? 'sin ' : ''}${i.pizzaIngredient?.name}')
+              '${i.action == IngredientAction.remove ? 'Sin ' : ''}${i.pizzaIngredient?.name}')
           .join(', ');
       final ingredientsRight = item.selectedPizzaIngredients!
           .where((i) => i.half == PizzaHalf.right)
           .map((i) =>
-              '${i.action == IngredientAction.remove ? 'sin ' : ''}${i.pizzaIngredient?.name}')
+              '${i.action == IngredientAction.remove ? 'Sin ' : ''}${i.pizzaIngredient?.name}')
           .join(', ');
       final ingredientsNone = item.selectedPizzaIngredients!
           .where((i) => i.half == PizzaHalf.full)
           .map((i) =>
-              '${i.action == IngredientAction.remove ? 'sin ' : ''}${i.pizzaIngredient?.name}')
+              '${i.action == IngredientAction.remove ? 'Sin ' : ''}${i.pizzaIngredient?.name}')
           .join(', ');
 
       String ingredientsText = '';

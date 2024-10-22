@@ -539,7 +539,48 @@ class _ProductPersonalizationPageState
                 return Column(
                   children: [
                     CheckboxListTile(
-                      title: Text(ingredient.name),
+                      title: Row(
+                        children: [
+                          Expanded(
+                            child: Text(ingredient.name),
+                          ),
+                          // Switch integrado en la misma línea
+                          if (selectedPizzaIngredients.any((selected) =>
+                              selected.pizzaIngredient?.id == ingredient.id &&
+                              selected.half == half))
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text('Quitar', style: TextStyle(fontSize: 12)),
+                                Switch(
+                                  value: selectedIngredient.action ==
+                                      IngredientAction.add,
+                                  onChanged: (bool value) {
+                                    setState(() {
+                                      int index = selectedPizzaIngredients
+                                          .indexWhere((selected) =>
+                                              selected.pizzaIngredient?.id ==
+                                                  ingredient.id &&
+                                              selected.half == half);
+                                      if (index != -1) {
+                                        selectedPizzaIngredients[index] =
+                                            SelectedPizzaIngredient(
+                                          pizzaIngredient: ingredient,
+                                          half: half,
+                                          action: value
+                                              ? IngredientAction.add
+                                              : IngredientAction.remove,
+                                        );
+                                      }
+                                      _updatePrice(); // Añadido para actualizar el precio
+                                    });
+                                  },
+                                ),
+                                Text('Añadir', style: TextStyle(fontSize: 12)),
+                              ],
+                            ),
+                        ],
+                      ),
                       value: selectedPizzaIngredients.any((selected) =>
                           selected.pizzaIngredient?.id == ingredient.id &&
                           selected.half == half),
@@ -561,43 +602,6 @@ class _ProductPersonalizationPageState
                         });
                       },
                     ),
-                    // Mostrar el switch solo si el ingrediente está seleccionado
-                    if (selectedPizzaIngredients.any((selected) =>
-                        selected.pizzaIngredient?.id == ingredient.id &&
-                        selected.half == half))
-                      Padding(
-                        padding: EdgeInsets.only(left: 72.0, right: 16.0),
-                        child: Row(
-                          children: [
-                            Text('Quitar'),
-                            Switch(
-                              value: selectedIngredient.action ==
-                                  IngredientAction.add,
-                              onChanged: (bool value) {
-                                setState(() {
-                                  // Encontrar y actualizar el ingrediente existente
-                                  int index = selectedPizzaIngredients
-                                      .indexWhere((selected) =>
-                                          selected.pizzaIngredient?.id ==
-                                              ingredient.id &&
-                                          selected.half == half);
-                                  if (index != -1) {
-                                    selectedPizzaIngredients[index] =
-                                        SelectedPizzaIngredient(
-                                      pizzaIngredient: ingredient,
-                                      half: half,
-                                      action: value
-                                          ? IngredientAction.add
-                                          : IngredientAction.remove,
-                                    );
-                                  }
-                                });
-                              },
-                            ),
-                            Text('Añadir'),
-                          ],
-                        ),
-                      ),
                   ],
                 );
               }).toList(),
@@ -649,35 +653,38 @@ class _ProductPersonalizationPageState
     }
 
     if (_createTwoHalves) {
+      // Calcular valor para mitad izquierda
       int leftIngredientsValue = selectedPizzaIngredients
           .where((ingredient) => ingredient.half == PizzaHalf.left)
-          .map((ingredient) => ingredient.pizzaIngredient?.ingredientValue ?? 0)
-          .fold(0, (previousValue, element) => previousValue + element);
+          .map((ingredient) {
+        int value = ingredient.pizzaIngredient?.ingredientValue ?? 0;
+        return ingredient.action == IngredientAction.add ? value : -value;
+      }).fold(0, (prev, element) => prev + element);
+
+      // Calcular valor para mitad derecha
       int rightIngredientsValue = selectedPizzaIngredients
           .where((ingredient) => ingredient.half == PizzaHalf.right)
-          .map((ingredient) => ingredient.pizzaIngredient?.ingredientValue ?? 0)
-          .fold(0, (previousValue, element) => previousValue + element);
+          .map((ingredient) {
+        int value = ingredient.pizzaIngredient?.ingredientValue ?? 0;
+        return ingredient.action == IngredientAction.add ? value : -value;
+      }).fold(0, (prev, element) => prev + element);
 
+      // Aplicar cargos extra si excede 4 ingredientes
       if (leftIngredientsValue > 4) {
-        int extraLeftIngredientsValue = leftIngredientsValue - 4;
-        price += extraLeftIngredientsValue *
-            5.0; // Costo extra por ingredientes adicionales en la mitad izquierda
+        price += (leftIngredientsValue - 4) * 5.0;
       }
-
       if (rightIngredientsValue > 4) {
-        int extraRightIngredientsValue = rightIngredientsValue - 4;
-        price += extraRightIngredientsValue *
-            5.0; // Costo extra por ingredientes adicionales en la mitad derecha
+        price += (rightIngredientsValue - 4) * 5.0;
       }
     } else {
-      int totalIngredientsValue = selectedPizzaIngredients
-          .map((ingredient) => ingredient.pizzaIngredient?.ingredientValue ?? 0)
-          .fold(0, (previousValue, element) => previousValue + element);
+      // Calcular valor total para pizza completa
+      int totalIngredientsValue = selectedPizzaIngredients.map((ingredient) {
+        int value = ingredient.pizzaIngredient?.ingredientValue ?? 0;
+        return ingredient.action == IngredientAction.add ? value : -value;
+      }).fold(0, (prev, element) => prev + element);
 
       if (totalIngredientsValue > 4) {
-        int extraIngredientsValue = totalIngredientsValue - 4;
-        price += extraIngredientsValue *
-            10.0; // Costo extra por ingredientes adicionales
+        price += (totalIngredientsValue - 4) * 10.0;
       }
     }
 

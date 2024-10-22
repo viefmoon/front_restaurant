@@ -138,6 +138,20 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
           width: PosTextSize.size1,
         ));
 
+    // Agregar hora programada si existe
+    if (order.scheduledDeliveryTime != null) {
+      String scheduledTime =
+          DateFormat('HH:mm').format(order.scheduledDeliveryTime!.toLocal());
+      bytes += generator.text(
+        _removeAccents('Hora programada: $scheduledTime'),
+        styles: PosStyles(
+          align: PosAlign.left,
+          height: PosTextSize.size1,
+          width: PosTextSize.size1,
+        ),
+      );
+    }
+
     bytes += generator.hr();
 
     // Imprimir los detalles de los productos de la orden
@@ -194,19 +208,19 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
         final ingredientsLeft = _removeAccents(item.selectedPizzaIngredients!
             .where((i) => i.half == PizzaHalf.left)
             .map((i) => i.action == IngredientAction.remove
-                ? 'sin ${i.pizzaIngredient?.name}'
+                ? 'Sin ${i.pizzaIngredient?.name}'
                 : i.pizzaIngredient?.name)
             .join(', '));
         final ingredientsRight = _removeAccents(item.selectedPizzaIngredients!
             .where((i) => i.half == PizzaHalf.right)
             .map((i) => i.action == IngredientAction.remove
-                ? 'sin ${i.pizzaIngredient?.name}'
+                ? 'Sin ${i.pizzaIngredient?.name}'
                 : i.pizzaIngredient?.name)
             .join(', '));
         final ingredientsNone = _removeAccents(item.selectedPizzaIngredients!
             .where((i) => i.half == PizzaHalf.full)
             .map((i) => i.action == IngredientAction.remove
-                ? 'sin ${i.pizzaIngredient?.name}'
+                ? 'Sin ${i.pizzaIngredient?.name}'
                 : i.pizzaIngredient?.name)
             .join(', '));
         if (ingredientsLeft.isNotEmpty) {
@@ -375,6 +389,20 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
           width: PosTextSize.size1,
         ));
 
+    // Agregar hora programada si existe
+    if (order.scheduledDeliveryTime != null) {
+      String scheduledTime =
+          DateFormat('HH:mm').format(order.scheduledDeliveryTime!.toLocal());
+      bytes += generator.text(
+        _removeAccents('Hora programada: $scheduledTime'),
+        styles: PosStyles(
+          align: PosAlign.left,
+          height: PosTextSize.size1,
+          width: PosTextSize.size1,
+        ),
+      );
+    }
+
     bytes += generator.hr();
 
     // Imprimir los detalles de los productos de la orden
@@ -431,19 +459,19 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
         final ingredientsLeft = _removeAccents(item.selectedPizzaIngredients!
             .where((i) => i.half == PizzaHalf.left)
             .map((i) => i.action == IngredientAction.remove
-                ? 'sin ${i.pizzaIngredient?.name}'
+                ? 'Sin ${i.pizzaIngredient?.name}'
                 : i.pizzaIngredient?.name)
             .join(', '));
         final ingredientsRight = _removeAccents(item.selectedPizzaIngredients!
             .where((i) => i.half == PizzaHalf.right)
             .map((i) => i.action == IngredientAction.remove
-                ? 'sin ${i.pizzaIngredient?.name}'
+                ? 'Sin ${i.pizzaIngredient?.name}'
                 : i.pizzaIngredient?.name)
             .join(', '));
         final ingredientsNone = _removeAccents(item.selectedPizzaIngredients!
             .where((i) => i.half == PizzaHalf.full)
             .map((i) => i.action == IngredientAction.remove
-                ? 'sin ${i.pizzaIngredient?.name}'
+                ? 'Sin ${i.pizzaIngredient?.name}'
                 : i.pizzaIngredient?.name)
             .join(', '));
         if (ingredientsLeft.isNotEmpty) {

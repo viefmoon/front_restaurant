@@ -655,19 +655,19 @@ class _OrderUpdatePageState extends State<OrderUpdatePage> {
                   final ingredientsLeft = orderItem.selectedPizzaIngredients!
                       .where((i) => i.half == PizzaHalf.left)
                       .map((i) => i.action == IngredientAction.remove
-                          ? 'sin ${i.pizzaIngredient?.name}'
+                          ? 'Sin ${i.pizzaIngredient?.name}'
                           : i.pizzaIngredient?.name)
                       .join(', ');
                   final ingredientsRight = orderItem.selectedPizzaIngredients!
                       .where((i) => i.half == PizzaHalf.right)
                       .map((i) => i.action == IngredientAction.remove
-                          ? 'sin ${i.pizzaIngredient?.name}'
+                          ? 'Sin ${i.pizzaIngredient?.name}'
                           : i.pizzaIngredient?.name)
                       .join(', ');
                   final ingredientsNone = orderItem.selectedPizzaIngredients!
                       .where((i) => i.half == PizzaHalf.full)
                       .map((i) => i.action == IngredientAction.remove
-                          ? 'sin ${i.pizzaIngredient?.name}'
+                          ? 'Sin ${i.pizzaIngredient?.name}'
                           : i.pizzaIngredient?.name)
                       .join(', ');
 
