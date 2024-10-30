@@ -125,7 +125,7 @@ class _BarPreparationPageState extends State<BarPreparationPage> {
                 break;
               case OrderFilterType.dineIn:
                 matchesType = order.orderType == OrderType.dineIn ||
-                    order.orderType == OrderType.pickUpWait;
+                    order.orderType == OrderType.pickup;
                 break;
               case OrderFilterType.all:
               default:

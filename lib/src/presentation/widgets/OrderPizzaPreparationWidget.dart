@@ -296,7 +296,7 @@ class _OrderPizzaPreparationWidgetState
         return Color(0xFFFFDAB9); // Pastel Orange
       case OrderType.dineIn:
         return Color(0xFF98FB98); // Pastel Green
-      case OrderType.pickUpWait:
+      case OrderType.pickup:
         return Color.fromARGB(255, 244, 184, 244); // Pastel Violet
       default:
         return Colors.grey;
@@ -439,14 +439,14 @@ class _OrderPizzaPreparationWidgetState
         orderDetails.add(buildSubHeaderDetail(detallesDineIn,
             updates: widget.order.orderUpdates));
         break;
-      case OrderType.pickUpWait:
-        String detallesPickUpWait =
+      case OrderType.pickup:
+        String detallesPickup =
             'Cliente: ${widget.order.customerName}\nTeléfono: ${widget.order.phoneNumber}';
         if (widget.order.comments != null &&
             widget.order.comments!.isNotEmpty) {
-          detallesPickUpWait += '\nComentarios: ${widget.order.comments}';
+          detallesPickup += '\nComentarios: ${widget.order.comments}';
         }
-        orderDetails.add(buildSubHeaderDetail(detallesPickUpWait,
+        orderDetails.add(buildSubHeaderDetail(detallesPickup,
             updates: widget.order.orderUpdates));
         break;
       default:
@@ -645,7 +645,7 @@ class _OrderPizzaPreparationWidgetState
         return 'Domicilio';
       case OrderType.dineIn:
         return 'Dentro';
-      case OrderType.pickUpWait:
+      case OrderType.pickup:
         return 'Pasan/Esperan';
       default:
         return 'Desconocido';

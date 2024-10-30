@@ -30,7 +30,7 @@ class OrderUpdatePage extends StatefulWidget {
 final Map<OrderType, String> _orderTypeTranslations = {
   OrderType.dineIn: 'Comer Dentro',
   OrderType.delivery: 'Entrega a domicilio',
-  OrderType.pickUpWait: 'Llevar/Esperar',
+  OrderType.pickup: 'Llevar/Esperar',
 };
 
 class _OrderUpdatePageState extends State<OrderUpdatePage> {
@@ -430,7 +430,7 @@ class _OrderUpdatePageState extends State<OrderUpdatePage> {
               ),
             ));
             break;
-          case OrderType.pickUpWait:
+          case OrderType.pickup:
             headerDetails.add(Padding(
               padding:
                   const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
@@ -1115,7 +1115,7 @@ class _OrderUpdatePageState extends State<OrderUpdatePage> {
           return; // Salir del método para evitar enviar la orden
         }
         break;
-      case OrderType.pickUpWait:
+      case OrderType.pickup:
         if (state.customerName == null || state.customerName!.isEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -1685,7 +1685,7 @@ class _OrderUpdatePageState extends State<OrderUpdatePage> {
               height: PosTextSize.size2, width: PosTextSize.size1, bold: true),
         );
         break;
-      case OrderType.pickUpWait:
+      case OrderType.pickup:
         bytes += generator.text(
           _removeAccents('Nombre del Cliente: ${state.customerName}'),
           styles: PosStyles(
@@ -1838,7 +1838,7 @@ class _OrderUpdatePageState extends State<OrderUpdatePage> {
               height: PosTextSize.size2, width: PosTextSize.size1, bold: true),
         );
         break;
-      case OrderType.pickUpWait:
+      case OrderType.pickup:
         bytes += generator.text(
           _removeAccents('Nombre del Cliente: ${state.customerName}'),
           styles: PosStyles(

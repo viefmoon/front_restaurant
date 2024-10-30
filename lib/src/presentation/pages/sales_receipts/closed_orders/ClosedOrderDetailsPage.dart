@@ -121,7 +121,7 @@ class _ClosedOrderDetailsPageState extends State<ClosedOrderDetailsPage> {
             ),
           ],
         );
-      case OrderType.pickUpWait:
+      case OrderType.pickup:
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -331,7 +331,7 @@ class _ClosedOrderDetailsPageState extends State<ClosedOrderDetailsPage> {
         return 'Entrega a domicilio';
       case OrderType.dineIn:
         return 'Comer Dentro';
-      case OrderType.pickUpWait:
+      case OrderType.pickup:
         return 'Llevar/Esperar';
       default:
         return 'Desconocido';
@@ -489,7 +489,7 @@ class _ClosedOrderDetailsPageState extends State<ClosedOrderDetailsPage> {
             'Mesa: ${order.table?.number}\n' +
             cmdFontSizeNormal;
         break;
-      case OrderType.pickUpWait:
+      case OrderType.pickup:
         content += cmdFontSizeMedium +
             'Nombre del Cliente: ${order.customerName}\n' +
             cmdFontSizeNormal;

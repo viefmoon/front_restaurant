@@ -23,7 +23,7 @@ class OrderSummaryPage extends StatefulWidget {
 final Map<OrderType, String> _orderTypeTranslations = {
   OrderType.dineIn: 'Comer Dentro',
   OrderType.delivery: 'Entrega a domicilio',
-  OrderType.pickUpWait: 'Para llevar/Esperar',
+  OrderType.pickup: 'Para llevar/Esperar',
 };
 
 class _OrderSummaryPageState extends State<OrderSummaryPage> {
@@ -338,7 +338,7 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
                     ),
                   ));
                   break;
-                case OrderType.pickUpWait:
+                case OrderType.pickup:
                   headerDetails.add(Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 10.0, vertical: 10.0),
@@ -895,7 +895,7 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
           return; // Salir del método para evitar enviar la orden
         }
         break;
-      case OrderType.pickUpWait:
+      case OrderType.pickup:
         if (state.customerName == null || state.customerName!.isEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

@@ -5,7 +5,7 @@ import 'package:restaurante/src/domain/models/OrderUpdate.dart';
 import 'package:restaurante/src/domain/models/Table.dart' as TableModel;
 import 'package:restaurante/src/domain/models/Area.dart';
 
-enum OrderType { delivery, dineIn, pickUpWait }
+enum OrderType { delivery, dineIn, pickup }
 
 enum OrderStatus {
   created,

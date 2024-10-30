@@ -109,7 +109,7 @@ class OrderCreationBloc extends Bloc<OrderCreationEvent, OrderCreationState> {
       case OrderType.dineIn:
         nextStep = OrderCreationStep.tableSelection;
         break;
-      case OrderType.pickUpWait:
+      case OrderType.pickup:
         nextStep = OrderCreationStep.productSelection;
         add(LoadCategoriesWithProducts());
         break;
@@ -394,7 +394,7 @@ class OrderCreationBloc extends Bloc<OrderCreationEvent, OrderCreationState> {
           deliveryAddress: state.deliveryAddress,
         );
         break;
-      case OrderType.pickUpWait:
+      case OrderType.pickup:
         order = order.copyWith(
           phoneNumber: state.phoneNumber,
           customerName: state.customerName,

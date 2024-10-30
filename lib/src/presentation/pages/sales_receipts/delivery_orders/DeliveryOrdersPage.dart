@@ -21,7 +21,7 @@ class DeliveryOrdersPage extends StatefulWidget {
 class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
   List<Order> selectedOrders = [];
   bool filterDelivery = false;
-  bool filterPickUpWait = false;
+  bool filterPickup = false;
 
   @override
   void initState() {
@@ -44,9 +44,9 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
       return orders
           .where((order) => order.orderType == OrderType.delivery)
           .toList();
-    } else if (filterPickUpWait) {
+    } else if (filterPickup) {
       return orders
-          .where((order) => order.orderType == OrderType.pickUpWait)
+          .where((order) => order.orderType == OrderType.pickup)
           .toList();
     }
     return orders;
@@ -98,7 +98,7 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
                 width: PosTextSize.size2,
                 bold: true));
         break;
-      case OrderType.pickUpWait:
+      case OrderType.pickup:
         bytes += generator.text(
             _removeAccents('Nombre del Cliente: ${order.customerName}'),
             styles: PosStyles(
@@ -349,7 +349,7 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
                 width: PosTextSize.size1,
                 bold: true));
         break;
-      case OrderType.pickUpWait:
+      case OrderType.pickup:
         bytes += generator.text(
             _removeAccents('Nombre del Cliente: ${order.customerName}'),
             styles: PosStyles(
@@ -804,17 +804,17 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
             onChanged: (bool? value) {
               setState(() {
                 filterDelivery = value!;
-                filterPickUpWait = false;
+                filterPickup = false;
               });
             },
           ),
           CheckboxListTile(
             title:
                 Text('Filtrar Pasan/Esperan', style: TextStyle(fontSize: 24)),
-            value: filterPickUpWait,
+            value: filterPickup,
             onChanged: (bool? value) {
               setState(() {
-                filterPickUpWait = value!;
+                filterPickup = value!;
                 filterDelivery = false;
               });
             },
@@ -894,7 +894,7 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
 
                       // Determine the display text based on the order type
                       String displayText;
-                      if (order.orderType == OrderType.pickUpWait) {
+                      if (order.orderType == OrderType.pickup) {
                         displayText =
                             '#${order.id} - ${order.customerName}, Tel: ${order.phoneNumber}';
                       } else {

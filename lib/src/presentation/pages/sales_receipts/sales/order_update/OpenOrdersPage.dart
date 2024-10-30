@@ -78,7 +78,7 @@ class _OpenOrdersPageState extends State<OpenOrdersPage> {
                 case OrderType.dineIn:
                   displayText = "Cenar";
                   break;
-                case OrderType.pickUpWait:
+                case OrderType.pickup:
                   displayText = "Pasan/Esperan";
                   break;
                 default:
@@ -220,7 +220,7 @@ class _OpenOrdersPageState extends State<OpenOrdersPage> {
                             }
                           }
                           break;
-                        case OrderType.pickUpWait:
+                        case OrderType.pickup:
                           title += ' - Recoger';
                           title += order.customerName != null
                               ? ' - ${order.customerName}'

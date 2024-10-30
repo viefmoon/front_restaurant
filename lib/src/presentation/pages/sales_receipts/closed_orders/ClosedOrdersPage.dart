@@ -52,7 +52,7 @@ class _ClosedOrdersPageState extends State<ClosedOrdersPage> {
                 case OrderType.dineIn:
                   displayText = "Cenar";
                   break;
-                case OrderType.pickUpWait:
+                case OrderType.pickup:
                   displayText = "Pasan/Esperan";
                   break;
                 default:
@@ -123,7 +123,7 @@ class _ClosedOrdersPageState extends State<ClosedOrdersPage> {
                           ' - ${order.area!.name} ${order.table!.number ?? order.table!.temporaryIdentifier}';
                     }
                     break;
-                  case OrderType.pickUpWait:
+                  case OrderType.pickup:
                     title += ' - Recoger';
                     title += order.customerName != null
                         ? ' - ${order.customerName}'

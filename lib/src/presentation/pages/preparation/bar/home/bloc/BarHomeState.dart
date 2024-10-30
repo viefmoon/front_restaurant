@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-enum OrderFilterType { all, delivery, dineIn, pickUpWait }
+enum OrderFilterType { all, delivery, dineIn, pickup }
 
 class BarHomeState extends Equatable {
   final int pageIndex;

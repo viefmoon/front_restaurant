@@ -431,7 +431,7 @@ class OrderUpdateBloc extends Bloc<OrderUpdateEvent, OrderUpdateState> {
           deliveryAddress: state.deliveryAddress,
         );
         break;
-      case OrderType.pickUpWait:
+      case OrderType.pickup:
         order = order.copyWith(
           phoneNumber: state.phoneNumber,
           customerName: state.customerName,

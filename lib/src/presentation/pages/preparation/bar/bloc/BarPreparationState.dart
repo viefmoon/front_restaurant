@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:restaurante/src/domain/models/Order.dart';
 
-enum OrderFilter { all, delivery, dineIn, pickUpWait }
+enum OrderFilter { all, delivery, dineIn, pickup }
 
 class BarPreparationState extends Equatable {
   final bool isConnected;
