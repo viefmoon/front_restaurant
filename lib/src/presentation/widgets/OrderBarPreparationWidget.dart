@@ -409,6 +409,7 @@ class _OrderBarPreparationWidgetState extends State<OrderBarPreparationWidget> {
             updates: widget.order.orderUpdates));
         break;
       case OrderType.pickup:
+<<<<<<< HEAD
         String detallesPickup =
             'Cliente: ${widget.order.customerName}\nTeléfono: ${widget.order.phoneNumber}';
         if (widget.order.comments != null &&
@@ -416,6 +417,15 @@ class _OrderBarPreparationWidgetState extends State<OrderBarPreparationWidget> {
           detallesPickup += '\nComentarios: ${widget.order.comments}';
         }
         orderDetails.add(buildSubHeaderDetail(detallesPickup,
+=======
+        String detallesPickUp =
+            'Cliente: ${widget.order.customerName}\nTeléfono: ${widget.order.phoneNumber}';
+        if (widget.order.comments != null &&
+            widget.order.comments!.isNotEmpty) {
+          detallesPickUp += '\nComentarios: ${widget.order.comments}';
+        }
+        orderDetails.add(buildSubHeaderDetail(detallesPickUp,
+>>>>>>> 409b3669cb91bb755873c1473dd672d35c32d9a2
             updates: widget.order.orderUpdates));
         break;
       default:
