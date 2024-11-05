@@ -913,29 +913,69 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
         break; // No se requieren verificaciones adicionales para otros tipos de orden
     }
 
-    // Deshabilitar el botón antes de enviar la orden
+    // Deshabilitar el botón
     setState(() {
       isButtonDisabled = true;
     });
 
-    BlocProvider.of<OrderCreationBloc>(context).add(SendOrder());
+    try {
+      BlocProvider.of<OrderCreationBloc>(context).add(SendOrder());
 
-    // Declarar la variable subscription antes de usarla
-    StreamSubscription<OrderCreationState>? subscription;
-    subscription = BlocProvider.of<OrderCreationBloc>(context)
-        .stream
-        .listen((updatedState) {
-      if (updatedState.response is Success<String> ||
-          updatedState.response is Error<String>) {
-        subscription?.cancel();
-        _navigateBasedOnRole(context);
+      StreamSubscription<OrderCreationState>? subscription;
+      subscription = BlocProvider.of<OrderCreationBloc>(context)
+          .stream
+          .listen((updatedState) {
+        if (updatedState.response is Success<String>) {
+          subscription?.cancel();
+          _navigateBasedOnRole(context);
+        } else if (updatedState.response is Error<String>) {
+          subscription?.cancel();
+          // Habilitar el botón nuevamente
+          setState(() {
+            isButtonDisabled = false;
+          });
 
-        // Volver a habilitar el botón después de enviar la orden
-        setState(() {
-          isButtonDisabled = false;
-        });
-      }
-    });
+          // Mostrar mensaje de error pero mantener la orden
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: Colors.red,
+              content: Text(
+                'Error de conexión, revise la conexión a wifi e intente nuevamente.',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+              ),
+              duration: Duration(seconds: 2),
+              action: SnackBarAction(
+                label: 'Reintentar',
+                textColor: Colors.white,
+                onPressed: () => _sendOrder(context, state),
+              ),
+            ),
+          );
+        }
+      });
+    } catch (e) {
+      // Habilitar el botón en caso de error
+      setState(() {
+        isButtonDisabled = false;
+      });
+
+      // Mostrar mensaje de error pero mantener la orden
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          content: Text(
+            'Error de conexión. Por favor, intente nuevamente.',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+          ),
+          duration: Duration(seconds: 3),
+          action: SnackBarAction(
+            label: 'Reintentar',
+            textColor: Colors.white,
+            onPressed: () => _sendOrder(context, state),
+          ),
+        ),
+      );
+    }
   }
 
   void _navigateBasedOnRole(BuildContext context) {

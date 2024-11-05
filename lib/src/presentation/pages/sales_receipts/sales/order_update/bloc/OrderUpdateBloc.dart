@@ -351,101 +351,112 @@ class OrderUpdateBloc extends Bloc<OrderUpdateEvent, OrderUpdateState> {
 
   Future<void> _onUpdateOrder(
       UpdateOrder event, Emitter<OrderUpdateState> emit) async {
-    DateTime? scheduledDeliveryDateTime;
-    if (state.isTimePickerEnabled == true &&
-        state.scheduledDeliveryTime != null) {
-      final now = DateTime.now();
-      scheduledDeliveryDateTime = DateTime(
-        now.year,
-        now.month,
-        now.day,
-        state.scheduledDeliveryTime!.hour,
-        state.scheduledDeliveryTime!.minute,
+    // Guardar el estado actual antes de la actualización
+    final currentState = state;
+
+    try {
+      DateTime? scheduledDeliveryDateTime;
+      if (state.isTimePickerEnabled == true &&
+          state.scheduledDeliveryTime != null) {
+        final now = DateTime.now();
+        scheduledDeliveryDateTime = DateTime(
+          now.year,
+          now.month,
+          now.day,
+          state.scheduledDeliveryTime!.hour,
+          state.scheduledDeliveryTime!.minute,
+        );
+      }
+
+      // Calcula el totalCost antes de crear la orden
+      double totalCost = 0;
+
+      // Calcula el total de los OrderItems
+      for (var orderItem in state.orderItems ?? []) {
+        totalCost += orderItem.price ?? 0;
+      }
+
+      // Calcula el total de los OrderAdjustments
+      for (var orderAdjustment in state.orderAdjustments ?? []) {
+        totalCost += orderAdjustment.amount ?? 0;
+      }
+
+      // Actualiza el estado con el totalCost calculado
+      emit(state.copyWith(totalCost: totalCost));
+
+      // Inicializa los campos comunes para todos los tipos de orden
+      // Inicializa los campos comunes para todos los tipos de orden
+      Order order = Order(
+        id: state.orderIdSelectedForUpdate,
+        orderType: state.selectedOrderType,
+        status: OrderStatus.created,
+        totalCost: state.totalCost,
+        comments: state.comments,
+        creationDate: DateTime.now(),
+        scheduledDeliveryTime: scheduledDeliveryDateTime,
+        // Inicializa los campos opcionales como null
+        phoneNumber: null,
+        deliveryAddress: null,
+        customerName: null,
+        area: null,
+        table: null,
+        orderItems: state.orderItems,
+        orderAdjustments: state.orderAdjustments,
       );
-    }
 
-    // Calcula el totalCost antes de crear la orden
-    double totalCost = 0;
-
-    // Calcula el total de los OrderItems
-    for (var orderItem in state.orderItems ?? []) {
-      totalCost += orderItem.price ?? 0;
-    }
-
-    // Calcula el total de los OrderAdjustments
-    for (var orderAdjustment in state.orderAdjustments ?? []) {
-      totalCost += orderAdjustment.amount ?? 0;
-    }
-
-    // Actualiza el estado con el totalCost calculado
-    emit(state.copyWith(totalCost: totalCost));
-
-    // Inicializa los campos comunes para todos los tipos de orden
-    // Inicializa los campos comunes para todos los tipos de orden
-    Order order = Order(
-      id: state.orderIdSelectedForUpdate,
-      orderType: state.selectedOrderType,
-      status: OrderStatus.created,
-      totalCost: state.totalCost,
-      comments: state.comments,
-      creationDate: DateTime.now(),
-      scheduledDeliveryTime: scheduledDeliveryDateTime,
-      // Inicializa los campos opcionales como null
-      phoneNumber: null,
-      deliveryAddress: null,
-      customerName: null,
-      area: null,
-      table: null,
-      orderItems: state.orderItems,
-      orderAdjustments: state.orderAdjustments,
-    );
-
-    // Asigna los campos específicos según el tipo de orden
-    switch (state.selectedOrderType) {
-      case OrderType.dineIn:
-        if (state.isTemporaryTableEnabled &&
-            (state.temporaryIdentifier?.isNotEmpty ?? false)) {
-          final newTable = appModel.Table(
-            id: null,
-            number: null,
-            temporaryIdentifier: state.temporaryIdentifier!,
-            status: appModel.TableStatus.Ocupada,
-          );
+      // Asigna los campos específicos según el tipo de orden
+      switch (state.selectedOrderType) {
+        case OrderType.dineIn:
+          if (state.isTemporaryTableEnabled &&
+              (state.temporaryIdentifier?.isNotEmpty ?? false)) {
+            final newTable = appModel.Table(
+              id: null,
+              number: null,
+              temporaryIdentifier: state.temporaryIdentifier!,
+              status: appModel.TableStatus.Ocupada,
+            );
+            order = order.copyWith(
+              area: state.areas
+                  ?.firstWhereOrNull((area) => area.id == state.selectedAreaId),
+              table: newTable,
+            );
+          } else {
+            order = order.copyWith(
+              area: state.areas
+                  ?.firstWhereOrNull((area) => area.id == state.selectedAreaId),
+              table: state.tables?.firstWhereOrNull(
+                  (table) => table.id == state.selectedTableId),
+            );
+          }
+          break;
+        case OrderType.delivery:
           order = order.copyWith(
-            area: state.areas
-                ?.firstWhereOrNull((area) => area.id == state.selectedAreaId),
-            table: newTable,
+            phoneNumber: state.phoneNumber,
+            deliveryAddress: state.deliveryAddress,
           );
-        } else {
+          break;
+        case OrderType.pickup:
           order = order.copyWith(
-            area: state.areas
-                ?.firstWhereOrNull((area) => area.id == state.selectedAreaId),
-            table: state.tables?.firstWhereOrNull(
-                (table) => table.id == state.selectedTableId),
+            phoneNumber: state.phoneNumber,
+            customerName: state.customerName,
           );
-        }
-        break;
-      case OrderType.delivery:
-        order = order.copyWith(
-          phoneNumber: state.phoneNumber,
-          deliveryAddress: state.deliveryAddress,
-        );
-        break;
-      case OrderType.pickup:
-        order = order.copyWith(
-          phoneNumber: state.phoneNumber,
-          customerName: state.customerName,
-        );
-        break;
-      default:
-        break; // No se requiere acción adicional para otros tipos
-    }
+          break;
+        default:
+          break; // No se requiere acción adicional para otros tipos
+      }
 
-    Resource result = await ordersUseCases.updateOrder.run(order);
-    if (result is Success<Order>) {
-      emit(state.copyWith(response: Success(result)));
-    } else if (result is Error<Order>) {
-      emit(state.copyWith(response: Error(result.message)));
+      Resource result = await ordersUseCases.updateOrder.run(order);
+      if (result is Success<Order>) {
+        emit(state.copyWith(response: Success(result)));
+      } else if (result is Error<Order>) {
+        // En caso de error, mantener el estado actual y solo actualizar la respuesta
+        emit(currentState.copyWith(response: Error(result.message)));
+      }
+    } catch (e) {
+      // En caso de excepción, mantener el estado actual y emitir el error
+      emit(currentState.copyWith(
+          response:
+              Error('Error de conexión. Por favor, intente nuevamente.')));
     }
   }
 

@@ -149,6 +149,8 @@ class _OrderUpdatePageState extends State<OrderUpdatePage> {
                 duration: Duration(milliseconds: 800),
               ),
             );
+
+            // Solo navegar y resetear si fue exitoso
             BlocProvider.of<OrderUpdateBloc>(context)
               ..add(ResetResponseEvent())
               ..add(ResetOrderUpdateState());
@@ -166,16 +168,21 @@ class _OrderUpdatePageState extends State<OrderUpdatePage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
-                  (state.response as Error).message,
+                  'Error de conexión, revise la conexión a wifi e intente nuevamente.',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 backgroundColor: Colors.red,
                 duration: Duration(seconds: 2),
+                action: SnackBarAction(
+                  label: 'Reintentar',
+                  textColor: Colors.white,
+                  onPressed: () => _updateOrder(context, state),
+                ),
               ),
             );
-            // Recargar los datos de la orden actual
-            BlocProvider.of<OrderUpdateBloc>(context)
-                .add(OrderSelectedForUpdate(state.selectedOrder!));
+
+            // Solo resetear la respuesta, pero mantener el estado actual
+            BlocProvider.of<OrderUpdateBloc>(context).add(ResetResponseEvent());
           }
         },
         child: Scaffold(
@@ -1075,7 +1082,7 @@ class _OrderUpdatePageState extends State<OrderUpdatePage> {
           duration: Duration(seconds: 2),
         ),
       );
-      return; // Salir del método para evitar enviar la orden
+      return;
     }
 
     // Verificaciones adicionales basadas en el tipo de orden
@@ -1097,7 +1104,7 @@ class _OrderUpdatePageState extends State<OrderUpdatePage> {
               duration: Duration(seconds: 2),
             ),
           );
-          return; // Salir del método para evitar enviar la orden
+          return;
         }
         break;
       case OrderType.delivery:
@@ -1112,7 +1119,7 @@ class _OrderUpdatePageState extends State<OrderUpdatePage> {
               duration: Duration(seconds: 2),
             ),
           );
-          return; // Salir del método para evitar enviar la orden
+          return;
         }
         break;
       case OrderType.pickup:
@@ -1127,13 +1134,33 @@ class _OrderUpdatePageState extends State<OrderUpdatePage> {
               duration: Duration(seconds: 2),
             ),
           );
-          return; // Salir del método para evitar enviar la orden
+          return;
         }
         break;
       default:
         break; // No se requieren verificaciones adicionales para otros tipos de orden
     }
-    BlocProvider.of<OrderUpdateBloc>(context).add(UpdateOrder());
+
+    try {
+      // Emitir directamente el evento de actualización
+      BlocProvider.of<OrderUpdateBloc>(context).add(UpdateOrder());
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          content: Text(
+            'Error de conexión. Por favor, intente nuevamente.',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+          ),
+          duration: Duration(seconds: 3),
+          action: SnackBarAction(
+            label: 'Reintentar',
+            textColor: Colors.white,
+            onPressed: () => _updateOrder(context, state),
+          ),
+        ),
+      );
+    }
   }
 
   Widget _buildAreaDropdown(BuildContext context, OrderUpdateState state) {
