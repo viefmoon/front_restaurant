@@ -8,6 +8,7 @@ import 'package:restaurante/src/domain/models/Subcategory.dart';
 class Product {
   final String id;
   final String name;
+  final String shortName;
   final double? price;
   final String? imageUrl;
   Subcategory? subcategory;
@@ -20,6 +21,7 @@ class Product {
   Product({
     required this.id,
     required this.name,
+    required this.shortName,
     this.price,
     this.imageUrl,
     this.subcategory,
@@ -34,6 +36,7 @@ class Product {
     return Product(
       id: json['id'],
       name: json['name'],
+      shortName: json['shortName'],
       price: json['price'] != null ? double.parse(json['price']) : null,
       imageUrl: json['imageUrl'],
       subcategory: json['subcategory'] != null
@@ -71,6 +74,7 @@ class Product {
     final Map<String, dynamic> data = {};
     data['id'] = id;
     data['name'] = name;
+    data['shortName'] = shortName;
     data['price'] = price;
     data['imageUrl'] = imageUrl;
     if (subcategory != null) {
@@ -99,6 +103,7 @@ class Product {
   Product copyWith({
     String? id,
     String? name,
+    String? shortName,
     double? price,
     String? imageUrl,
     Subcategory? subcategory,
@@ -111,6 +116,7 @@ class Product {
     return Product(
       id: id ?? this.id,
       name: name ?? this.name,
+      shortName: shortName ?? this.shortName,
       price: price ?? this.price,
       imageUrl: imageUrl ?? this.imageUrl,
       subcategory: subcategory ?? this.subcategory,

@@ -4,6 +4,7 @@ import 'package:restaurante/src/domain/models/Product.dart';
 class ProductVariant {
   final String id;
   final String name;
+  final String shortName;
   final double? price;
   Product? product; // Relación ManyToOne con Product
   List<OrderItem>? orderItems; // Relación OneToMany con OrderItem
@@ -11,6 +12,7 @@ class ProductVariant {
   ProductVariant({
     required this.id,
     required this.name,
+    required this.shortName,
     this.price, // Hacemos que 'price' sea opcional en el constructor
     this.product,
     this.orderItems,
@@ -20,6 +22,7 @@ class ProductVariant {
     return ProductVariant(
       id: json['id'],
       name: json['name'],
+      shortName: json['shortName'],
       price: json['price'] != null
           ? double.tryParse(json['price'].toString())
           : null,
@@ -36,6 +39,7 @@ class ProductVariant {
     final Map<String, dynamic> data = <String, dynamic>{
       'id': id,
       'name': name,
+      'shortName': shortName,
       'price': price, // No es necesario cambiar nada aquí
     };
     if (product != null) {
