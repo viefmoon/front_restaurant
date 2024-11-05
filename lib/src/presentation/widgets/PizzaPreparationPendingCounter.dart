@@ -41,8 +41,8 @@ class _PizzaPreparationPendingCounterState
             item.product?.subcategory?.name == 'Pizzas' &&
             item.status == OrderItemStatus.created)
         .forEach((item) {
-      final name = item.productVariant?.name ??
-          item.product?.name ??
+      final name = item.productVariant?.shortName ??
+          item.product?.shortName ??
           'Producto desconocido';
       pizzaCounts[name] = (pizzaCounts[name] ?? 0) + 1;
     });
@@ -62,7 +62,7 @@ class _PizzaPreparationPendingCounterState
       print('Order ID: ${order.id}');
       for (var item in order.orderItems ?? []) {
         print(
-            '  Item: ${item.product?.name} , Subcategory: ${item.product?.subcategory} , Status: ${item.status}');
+            '  Item: ${item.product?.shortName} , Subcategory: ${item.product?.subcategory} , Status: ${item.status}');
       }
     }
   }

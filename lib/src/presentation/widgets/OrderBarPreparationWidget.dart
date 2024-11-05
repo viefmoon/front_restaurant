@@ -409,15 +409,6 @@ class _OrderBarPreparationWidgetState extends State<OrderBarPreparationWidget> {
             updates: widget.order.orderUpdates));
         break;
       case OrderType.pickup:
-<<<<<<< HEAD
-        String detallesPickup =
-            'Cliente: ${widget.order.customerName}\nTeléfono: ${widget.order.phoneNumber}';
-        if (widget.order.comments != null &&
-            widget.order.comments!.isNotEmpty) {
-          detallesPickup += '\nComentarios: ${widget.order.comments}';
-        }
-        orderDetails.add(buildSubHeaderDetail(detallesPickup,
-=======
         String detallesPickUp =
             'Cliente: ${widget.order.customerName}\nTeléfono: ${widget.order.phoneNumber}';
         if (widget.order.comments != null &&
@@ -425,7 +416,6 @@ class _OrderBarPreparationWidgetState extends State<OrderBarPreparationWidget> {
           detallesPickUp += '\nComentarios: ${widget.order.comments}';
         }
         orderDetails.add(buildSubHeaderDetail(detallesPickUp,
->>>>>>> 409b3669cb91bb755873c1473dd672d35c32d9a2
             updates: widget.order.orderUpdates));
         break;
       default:
@@ -506,16 +496,16 @@ class _OrderBarPreparationWidgetState extends State<OrderBarPreparationWidget> {
       List<Widget> itemWidgets = [
         if (orderItem.productVariant != null)
           Text(
-            orderItem.productVariant!.name,
+            orderItem.productVariant!.shortName,
             style: textStyle.copyWith(color: colorForItem),
           ),
         if (orderItem.productVariant == null)
           Text(
-            orderItem.product?.name ?? 'Producto desconocido',
+            orderItem.product?.shortName ?? 'Producto desconocido',
             style: textStyle.copyWith(color: colorForItem),
           ),
         ...orderItem.selectedModifiers?.map((modifier) => Text(
-                  modifier.modifier!.name,
+                  modifier.modifier!.shortName,
                   style:
                       smallerDecoratedTextStyle.copyWith(color: colorForItem),
                 )) ??

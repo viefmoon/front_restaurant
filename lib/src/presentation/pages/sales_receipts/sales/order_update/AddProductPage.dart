@@ -220,7 +220,7 @@ class _AddProductPageState extends State<AddProductPage> {
                       // Fallback al nombre del producto si la imagen no se puede cargar
                       return Center(
                         child: Text(
-                          product.name,
+                          product.shortName,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: const Color.fromARGB(221, 112, 71, 71),
@@ -250,7 +250,7 @@ class _AddProductPageState extends State<AddProductPage> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
-                        product.name,
+                        product.shortName,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 20,

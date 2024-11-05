@@ -524,12 +524,12 @@ class _OrderPizzaPreparationWidgetState
       List<Widget> itemWidgets = [
         if (orderItem.productVariant != null)
           Text(
-            orderItem.productVariant!.name,
+            orderItem.productVariant!.shortName,
             style: textStyle.copyWith(color: colorForItem),
           ),
         if (orderItem.productVariant == null)
           Text(
-            orderItem.product?.name ?? 'Producto desconocido',
+            orderItem.product?.shortName ?? 'Producto desconocido',
             style: textStyle.copyWith(color: colorForItem),
           ),
         if (orderItem.selectedPizzaFlavors != null &&
@@ -541,7 +541,7 @@ class _OrderPizzaPreparationWidgetState
             style: smallerDecoratedTextStyle.copyWith(color: colorForItem),
           ),
         ...orderItem.selectedModifiers?.map((modifier) => Text(
-                  modifier.modifier!.name,
+                  modifier.modifier!.shortName,
                   style:
                       smallerDecoratedTextStyle.copyWith(color: colorForItem),
                 )) ??

@@ -167,13 +167,13 @@ class _ClosedOrderDetailsPageState extends State<ClosedOrderDetailsPage> {
 
     if (item.productVariant != null) {
       details.add(Text(
-        'Variante: ${item.productVariant?.name}',
+        'Variante: ${item.productVariant?.shortName}',
         style: TextStyle(fontSize: 16),
       ));
     }
     if (item.selectedModifiers != null && item.selectedModifiers!.isNotEmpty) {
       details.add(Text(
-        'Modificadores: ${item.selectedModifiers!.map((m) => m.modifier?.name).join(', ')}',
+        'Modificadores: ${item.selectedModifiers!.map((m) => m.modifier?.shortName).join(', ')}',
         style: TextStyle(fontSize: 16),
       ));
     }
@@ -234,7 +234,7 @@ class _ClosedOrderDetailsPageState extends State<ClosedOrderDetailsPage> {
           children: [
             Expanded(
               child: Text(
-                item.product?.name ?? '',
+                item.product?.shortName ?? '',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ),
@@ -510,7 +510,7 @@ class _ClosedOrderDetailsPageState extends State<ClosedOrderDetailsPage> {
     order.orderItems?.forEach((item) {
       final int lineWidth = 32; // Ajusta según el ancho de tu impresora
       String productName =
-          item.productVariant?.name ?? item.product?.name ?? '';
+          item.productVariant?.shortName ?? item.product?.shortName ?? '';
       String productPrice = '\$${item.price?.toStringAsFixed(2) ?? ''}';
 
       // Calcula el espacio máximo disponible para el nombre del producto o variante

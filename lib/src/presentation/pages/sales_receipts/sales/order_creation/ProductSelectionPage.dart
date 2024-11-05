@@ -156,6 +156,7 @@ class ProductSelectionPage extends StatelessWidget {
                 product: Product(
                   id: product.id,
                   name: product.name,
+                  shortName: product.shortName,
                   price: product.price,
                 ),
                 status: OrderItemStatus.created,
@@ -201,7 +202,7 @@ class ProductSelectionPage extends StatelessWidget {
                     errorBuilder: (context, error, stackTrace) {
                       return Center(
                         child: Text(
-                          product.name,
+                          product.shortName,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: const Color.fromARGB(221, 112, 71, 71),
@@ -231,7 +232,7 @@ class ProductSelectionPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
-                        product.name,
+                        product.shortName,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 20,
@@ -287,6 +288,7 @@ class ProductSelectionPage extends StatelessWidget {
                                   product: Product(
                                     id: product.id,
                                     name: product.name,
+                                    shortName: product.shortName,
                                     price: product.price,
                                   ),
                                   status: OrderItemStatus.created,

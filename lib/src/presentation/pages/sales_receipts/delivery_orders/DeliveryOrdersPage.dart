@@ -156,8 +156,8 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
 
     // Imprimir los detalles de los productos de la orden
     order.orderItems?.forEach((item) {
-      String productName =
-          _removeAccents(item.productVariant?.name ?? item.product?.name ?? '');
+      String productName = _removeAccents(
+          item.productVariant?.shortName ?? item.product?.shortName ?? '');
       String productPrice = '\$${item.price?.toInt() ?? ''}';
 
       bytes += generator.row([
@@ -185,7 +185,7 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
       if (item.selectedModifiers != null &&
           item.selectedModifiers!.isNotEmpty) {
         String modifiersText = _removeAccents(
-            '${item.selectedModifiers!.map((m) => m.modifier?.name).join(', ')}');
+            '${item.selectedModifiers!.map((m) => m.modifier?.shortName).join(', ')}');
         bytes += generator.text(modifiersText,
             styles: PosStyles(
               align: PosAlign.left,
@@ -407,8 +407,8 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
 
     // Imprimir los detalles de los productos de la orden
     order.orderItems?.forEach((item) {
-      String productName =
-          _removeAccents(item.productVariant?.name ?? item.product?.name ?? '');
+      String productName = _removeAccents(
+          item.productVariant?.shortName ?? item.product?.shortName ?? '');
       String productPrice = '\$${item.price?.toInt() ?? ''}';
 
       bytes += generator.row([
@@ -436,7 +436,7 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
       if (item.selectedModifiers != null &&
           item.selectedModifiers!.isNotEmpty) {
         String modifiersText = _removeAccents(
-            '${item.selectedModifiers!.map((m) => m.modifier?.name).join(', ')}');
+            '${item.selectedModifiers!.map((m) => m.modifier?.shortName).join(', ')}');
         bytes += generator.text(modifiersText,
             styles: PosStyles(
               align: PosAlign.left,
@@ -932,17 +932,19 @@ class _DeliveryOrdersPageState extends State<DeliveryOrdersPage> {
                                               .map((entry) {
                                             final item = entry.key;
                                             final count = entry.value;
-                                            String itemName =
-                                                item.productVariant?.name ??
-                                                    item.product?.name ??
-                                                    '';
+                                            String itemName = item
+                                                    .productVariant
+                                                    ?.shortName ??
+                                                item.product?.shortName ??
+                                                '';
                                             if (item.selectedModifiers !=
                                                     null &&
                                                 item.selectedModifiers!
                                                     .isNotEmpty) {
                                               String modifiers = item
                                                   .selectedModifiers!
-                                                  .map((m) => m.modifier?.name)
+                                                  .map((m) =>
+                                                      m.modifier?.shortName)
                                                   .join(', ');
                                               itemName += ' ($modifiers)';
                                             }

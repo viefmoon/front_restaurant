@@ -146,7 +146,7 @@ class _ProductPersonalizationPageState
           title: Row(
             children: [
               Text(
-                widget.product.name,
+                widget.product.shortName,
                 style:
                     TextStyle(fontSize: 26), // Cambiado a una fuente más grande
               ),
@@ -354,7 +354,7 @@ class _ProductPersonalizationPageState
         ),
         for (var variant in variants)
           ListTile(
-            title: Text(variant.name),
+            title: Text(variant.shortName),
             trailing: Text('\$${variant.price!.toStringAsFixed(2)}'),
             selected: selectedVariant?.id ==
                 variant.id, // Compara por ID o algún otro campo único
@@ -406,7 +406,7 @@ class _ProductPersonalizationPageState
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         ),
         ...(modifierType.modifiers?.map((modifier) => CheckboxListTile(
-                  title: Text(modifier.name),
+                  title: Text(modifier.shortName),
                   subtitle: Text('\$${modifier.price!.toStringAsFixed(2)}'),
                   value: selectedModifiers.any((selectedModifier) =>
                       selectedModifier.modifier?.id ==

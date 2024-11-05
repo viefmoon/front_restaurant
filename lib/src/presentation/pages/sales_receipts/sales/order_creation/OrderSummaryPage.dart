@@ -524,13 +524,13 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
 
                     List<Widget> details = [];
                     if (orderItem.productVariant != null) {
-                      details.add(
-                          Text('Variante: ${orderItem.productVariant?.name}'));
+                      details.add(Text(
+                          'Variante: ${orderItem.productVariant?.shortName}'));
                     }
                     if (orderItem.selectedModifiers != null &&
                         orderItem.selectedModifiers!.isNotEmpty) {
                       details.add(Text(
-                          'Modificadores: ${orderItem.selectedModifiers!.map((m) => m.modifier?.name).join(', ')}'));
+                          'Modificadores: ${orderItem.selectedModifiers!.map((m) => m.modifier?.shortName).join(', ')}'));
                     }
                     if (orderItem.selectedPizzaFlavors != null &&
                         orderItem.selectedPizzaFlavors!.isNotEmpty) {
@@ -624,7 +624,7 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
                           title: Row(
                             children: [
                               Expanded(
-                                child: Text(orderItem.product?.name ?? ''),
+                                child: Text(orderItem.product?.shortName ?? ''),
                               ),
                               Text(
                                   '\$${orderItem.price?.toStringAsFixed(2) ?? ''}'),

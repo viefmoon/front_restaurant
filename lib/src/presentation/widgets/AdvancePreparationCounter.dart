@@ -38,8 +38,8 @@ class _AdvancePreparationCounterState extends State<AdvancePreparationCounter> {
             item.isBeingPreparedInAdvance == true &&
             item.status != OrderItemStatus.prepared)
         .forEach((item) {
-      final name = item.productVariant?.name ??
-          item.product?.name ??
+      final name = item.productVariant?.shortName ??
+          item.product?.shortName ??
           'Producto desconocido';
       itemCounts[name] = (itemCounts[name] ?? 0) + 1;
     });

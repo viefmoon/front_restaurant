@@ -632,14 +632,14 @@ class _OrderUpdatePageState extends State<OrderUpdatePage> {
 
                 if (orderItem.productVariant != null) {
                   details.add(Text(
-                    'Variante: ${orderItem.productVariant?.name}',
+                    'Variante: ${orderItem.productVariant?.shortName}',
                     style: TextStyle(color: textColor),
                   ));
                 }
                 if (orderItem.selectedModifiers != null &&
                     orderItem.selectedModifiers!.isNotEmpty) {
                   details.add(Text(
-                    'Modificadores: ${orderItem.selectedModifiers!.map((m) => m.modifier?.name).join(', ')}',
+                    'Modificadores: ${orderItem.selectedModifiers!.map((m) => m.modifier?.shortName).join(', ')}',
                     style: TextStyle(color: textColor),
                   ));
                 }
@@ -858,7 +858,7 @@ class _OrderUpdatePageState extends State<OrderUpdatePage> {
                         children: [
                           Expanded(
                             child: Text(
-                              orderItem.product?.name ?? '',
+                              orderItem.product?.shortName ?? '',
                               style: TextStyle(color: textColor),
                             ),
                           ),
@@ -1715,8 +1715,8 @@ class _OrderUpdatePageState extends State<OrderUpdatePage> {
 
     // Imprimir los detalles de los productos de la orden
     state.orderItems?.forEach((item) {
-      String productName =
-          _removeAccents(item.productVariant?.name ?? item.product?.name ?? '');
+      String productName = _removeAccents(
+          item.productVariant?.shortName ?? item.product?.shortName ?? '');
       String productPrice = '\$${item.price?.toStringAsFixed(2) ?? ''}';
 
       bytes += generator.row([
@@ -1868,8 +1868,8 @@ class _OrderUpdatePageState extends State<OrderUpdatePage> {
 
     // Imprimir los detalles de los productos de la orden
     state.orderItems?.forEach((item) {
-      String productName =
-          _removeAccents(item.productVariant?.name ?? item.product?.name ?? '');
+      String productName = _removeAccents(
+          item.productVariant?.shortName ?? item.product?.shortName ?? '');
       String productPrice = '\$${item.price?.toStringAsFixed(2) ?? ''}';
 
       bytes += generator.row([
